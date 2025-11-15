@@ -1,0 +1,34 @@
+\section{Desenvolvimento}
+
+% O desenvolvimento do projeto está organizado em ciclos iterativos que combinam a evolução do software com a execução dos
+% experimentos planejados. A cada ciclo são realizadas melhorias na implementação base do algoritmo genético, seguidas da coleta
+% e validação de dados empíricos. Essa dinâmica assegura que ajustes em parâmetros ou operadores possam ser rapidamente avaliados
+% antes de serem incorporados às campanhas experimentais definitivas.
+
+\subsection{Implementação da Ferramenta Experimental}
+
+% A primeira etapa concentrou-se na consolidação de uma biblioteca em \texttt{Python} que encapsula os componentes essenciais do
+% algoritmo genético. O código foi estruturado em módulos responsáveis pela geração da população inicial, aplicação dos
+% operadores evolutivos e monitoramento das métricas de desempenho. Testes preliminares com instâncias reduzidas do problema das
+% \textit{n}-rainhas (por exemplo, $n=8$ e $n=10$) confirmaram o correto funcionamento da avaliação de aptidão e dos operadores de
+% seleção, cruzamento e mutação. Esses testes também servem como base para a criação de casos de regressão automática, garantindo
+% que futuras modificações não introduzam regressões funcionais.
+
+\subsection{Execução dos Experimentos}
+
+Com a infraestrutura consolidada, o foco passa à execução sistemática dos cenários experimentais descritos na
+Seção~\ref{sec:metodologia}. Para cada combinação de estratégia de controle populacional, tamanho de população, taxa de mutação,
+tamanho de torneio e valor de $n$, a ferramenta realiza 100 execuções independentes registrando tempo de processamento, número de
+gerações e taxa de sucesso. Além disso, o ambiente de execução (sistema operacional, CPU, memória e versões das principais
+dependências) é capturado no início da campanha e anexado às observações exportadas. Os dados são armazenados em arquivos no
+formato \texttt{CSV}, facilitando a posterior agregação e análise estatística e a visualização por meio de gráficos comparativos.
+
+\subsection{Análise Parcial e Resultados Esperados}
+
+% As execuções preliminares indicam que abordagens com elitismo tendem a reduzir a variância no número de gerações, enquanto
+% configurações com substituição total apresentam tempos de execução inferiores para valores menores de $n$. Contudo, ainda são
+% necessários experimentos adicionais para confirmar essas tendências e estabelecer limites confiáveis para cada parâmetro. Espera-se
+% que a análise completa identifique faixas de tamanho populacional e taxas de substituição capazes de equilibrar diversidade e
+% pressão seletiva, resultando em convergência acelerada sem comprometer a taxa de sucesso. Os resultados finais serão sintetizados
+% em gráficos e tabelas que relacionem as estratégias avaliadas às métricas coletadas, servindo como guia prático para pesquisadores
+% e profissionais que utilizam algoritmos genéticos em problemas de otimização combinatória.

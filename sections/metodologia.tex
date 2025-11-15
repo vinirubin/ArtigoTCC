@@ -1,0 +1,117 @@
+\section{Metodologia}
+\label{sec:metodologia}
+
+Este trabalho adota uma abordagem experimental com o objetivo de investigar o impacto de diferentes estratégias de controle populacional em algoritmos genéticos (AGs), aplicados à resolução do problema das \textit{n}-rainhas. A condução metodológica segue as diretrizes propostas por Eiben e Smith~\cite{eiben2015introduction} e Goldberg~\cite{goldberg1989genetic}, priorizando a análise quantitativa de desempenho em cenários controlados e reprodutíveis.
+
+\subsection{Definição do Algoritmo Genético Base}
+
+Com base no referencial teórico, o algoritmo genético utilizado neste estudo segue uma estrutura padrão composta por etapas fundamentais que guiam a evolução das soluções ao longo das gerações. A seguir, são descritas as decisões metodológicas adotadas em cada uma dessas etapas.
+
+\subsubsection{Representação do Indivíduo}
+
+Cada indivíduo da população é representado por um vetor de permutação de tamanho $n$, em que a posição do vetor corresponde a uma coluna do tabuleiro e o valor armazenado nessa posição indica a linha ocupada pela rainha. Essa representação elimina conflitos em linhas e colunas, restando apenas os conflitos diagonais a serem tratados na avaliação da aptidão.
+
+\subsubsection{Inicialização}
+
+A população inicial é composta por indivíduos gerados aleatoriamente. Cada vetor é construído embaralhando uma sequência de inteiros de $0$ a $n-1$, garantindo diversidade genética desde o início da evolução. O tamanho da população é definido de acordo com a técnica de controle populacional aplicada em cada experimento.
+
+\subsubsection{Avaliação}
+
+A função de aptidão (\textit{fitness}) tem como objetivo contar a quantidade de conflitos diagonais existentes em uma configuração. Para isso, todos os pares de rainhas são comparados verificando se $|i - j| = |v[i] - v[j]|$, onde $i$ e $j$ representam índices de colunas distintas e $v[i]$ e $v[j]$ as respectivas linhas ocupadas. A complexidade computacional dessa etapa é de ordem $O(n^2)$, considerada apropriada para os valores de $n$ utilizados neste estudo.
+
+\subsubsection{Seleção}
+
+Será adotada a estratégia de torneio binário como método de seleção. Em cada torneio, dois indivíduos são escolhidos aleatoriamente da população, e aquele com melhor desempenho (menor número de conflitos) é selecionado para reprodução. O processo é repetido até formar a quantidade necessária de candidatos ao cruzamento, conforme a configuração da geração.
+
+\subsubsection{Cruzamento}
+
+O operador de cruzamento empregado será o \textit{Order Crossover} (OX), apropriado para problemas de permutação. O procedimento consiste em:
+\begin{enumerate}
+    \item Selecionar dois pontos de corte aleatórios no vetor de um dos pais;
+    \item Copiar a subsequência entre os pontos de corte para o descendente;
+    \item Preencher as posições restantes com os elementos do outro pai, respeitando a ordem relativa e evitando repetições.
+\end{enumerate}
+Esse operador garante a validade da solução gerada, mantendo a integridade da permutação e evitando conflitos estruturais.
+
+\subsubsection{Mutação}
+
+A mutação será realizada por meio da troca aleatória entre duas posições distintas do vetor do indivíduo. Essa operação simples é suficiente para introduzir variabilidade genética ao longo das gerações.
+
+\subsubsection{Substituição}
+
+Serão testadas três estratégias de substituição para controle populacional, cada uma combinando variações de tamanho populacional com ajustes de taxa de mutação e tamanho de torneio:
+
+\begin{itemize}
+    \item \textbf{Substituição total}: toda a população é substituída pelos indivíduos gerados na iteração atual. Cada variação de tamanho populacional (100, 200 e 300 indivíduos) é avaliada com taxas de mutação de 10\%, 20\% e 30\%, combinadas com torneios binários de tamanho $k=2$;
+
+    \item \textbf{Substituição parcial}: apenas uma fração da população é mantida, enquanto o restante é substituído. Serão testadas três variações de tamanho populacional (100, 200 e 300 indivíduos), três proporções de substituição (25\%, 50\% e 75\%) e as mesmas combinações de taxa de mutação com torneios binários de tamanho $k=2$ descritas anteriormente;
+
+    \item \textbf{Elitismo}: os melhores indivíduos da geração anterior são preservados e incorporados à nova população, garantindo que soluções de alta qualidade não sejam descartadas. Serão avaliadas três variações de tamanho populacional (100, 200 e 300 indivíduos), três proporções de elitismo (10\%, 20\% e 30\%) e as combinações de taxa de mutação com torneios binários de tamanho $k=2$ utilizadas nas demais estratégias.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\caption{Configurações experimentais por estratégia de controle populacional}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Estratégia} & \textbf{Parâmetro} & \textbf{Valores testados} \\
+\midrule
+\multirow{3}{*}{Substituição total}    & Tamanho da população     & 100, 200, 300 \\
+                                       & Taxa de mutação          & 10\%, 20\%, 30\% \\
+                                       & Tamanho do torneio ($k$) & 2 \\
+\midrule
+\multirow{4}{*}{Substituição parcial}  & Proporção substituída     & 25\%, 50\%, 75\% \\
+                                       & Tamanho da população      & 100, 200, 300 \\
+                                       & Taxa de mutação           & 10\%, 20\%, 30\% \\
+                                       & Tamanho do torneio ($k$)  & 2 \\
+\midrule
+\multirow{4}{*}{Elitismo}              & Proporção de elite        & 10\%, 20\%, 30\% \\
+                                       & Tamanho da população      & 100, 200, 300 \\
+                                       & Taxa de mutação           & 10\%, 20\%, 30\% \\
+                                       & Tamanho do torneio ($k$)  & 2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Experimentos}
+
+Os experimentos serão conduzidos a partir de $n = 4$. Após cada conjunto de 100 execuções independentes, o valor de $n$ é incrementado em uma unidade. O processo é encerrado quando a taxa de sucesso observada nas 100 execuções cair abaixo de 50\%, indicando que o cenário se tornou demasiadamente difícil para a configuração avaliada. Esse procedimento garante que cada estratégia seja analisada dentro de uma faixa de complexidade progressiva, mantendo comparabilidade entre os experimentos e evitando limites artificiais definidos apenas pela disponibilidade computacional. Para cada variação experimental de controle populacional, são realizadas 100 execuções por valor de $n$, com o objetivo de reduzir o viés estocástico e aumentar a robustez estatística dos resultados.
+
+Cada execução é encerrada quando uma solução sem conflitos é encontrada ou quando se atinge o número máximo de gerações. Durante as execuções, serão coletadas as seguintes métricas:
+
+\begin{itemize}
+    \item \textbf{Tempo de execução}: tempo, em segundos, até o algoritmo encontrar uma solução ou atingir o número máximo de gerações;
+    \item \textbf{Número de gerações}: quantidade de gerações necessárias para encontrar uma solução. Será adotado um limite máximo de 1.000 gerações, a fim de evitar execuções excessivamente longas em casos de não convergência;
+    \item \textbf{Taxa de sucesso}: proporção de execuções que encontraram uma solução válida dentro do limite de gerações estabelecido.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\caption{Métricas coletadas nos experimentos}
+\begin{tabular}{@{}lp{10cm}@{}}
+\toprule
+\textbf{Métrica} & \textbf{Descrição} \\
+\midrule
+Tempo de execução & Tempo necessário, em segundos, para encontrar uma solução válida ou atingir o limite de gerações estipulado. \\
+Número de gerações & Quantidade de gerações necessárias até que uma solução válida seja encontrada. \\
+Taxa de sucesso & Proporção de execuções que obtiveram solução válida dentro do limite de gerações estabelecido. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Codificação e Ambiente de Execução}
+
+A implementação será realizada em \texttt{Python}, apoiando-se em bibliotecas que já aparecem nos scripts do repositório: \texttt{numpy} (com o gerador \texttt{numpy.random.default\_rng} para todas as operações estocásticas), \texttt{secrets} (para a criação de sementes imprevisíveis), \texttt{numba} (para acelerar os núcleos mais custosos, com retrocesso automático para \texttt{numpy} puro quando indisponível), \texttt{argparse} (para parametrizar as execuções pela linha de comando), \texttt{psutil} (na coleta opcional de métricas de hardware), \texttt{time} (para mensuração de duração) e \texttt{matplotlib} (para a síntese gráfica dos resultados). Esse conjunto reflete as dependências efetivamente utilizadas em \texttt{code/}, removendo a referência ao módulo \texttt{random}, ausente nos experimentos automatizados.
+
+A geração de aleatoriedade é reproduzível: cada campanha registra a semente realmente empregada, inicializada com \texttt{secrets.randbits} quando não fornecida pelo usuário, e todas as permutações, torneios e mutações são conduzidos com o gerador vetorizado da NumPy. As métricas de execução (tempo total, número de gerações, taxa de sucesso e contadores de operadores) são acumuladas durante as rodadas e exportadas em arquivos CSV e JSON para posterior análise.
+
+Todos os testes são executados em um ambiente computacional controlado, com configurações fixas de hardware e software, garantindo reprodutibilidade conforme as boas práticas descritas por Eiben e Smith~\cite{eiben2015introduction}. No início de cada campanha, o script de experimentos consulta o sistema operacional, modelo de CPU, quantidade de núcleos lógicos, memória física disponível e versões de Python, NumPy e Numba (quando presentes), recorrendo ao \texttt{psutil} sempre que disponível para complementar as medições. Esses metadados são anexados aos resultados exportados, permitindo reconstruir o contexto de execução.
+
+\subsection{Análise dos Resultados}
+
+Os dados obtidos a partir das execuções experimentais serão organizados e analisados estatisticamente com o apoio de medidas de tendência central e dispersão. Para cada combinação de experimento e valor de $n$, serão calculados média, desvio padrão e intervalos de confiança de 95\% para tempo de execução e número de gerações, bem como o intervalo de confiança da taxa de sucesso a partir da aproximação de Wilson. Além dos resultados de desempenho, cada registro inclui metadados automáticos sobre o ambiente (hardware, sistema operacional e versões de bibliotecas) coletados no início da campanha, favorecendo a reprodutibilidade das análises. Esses indicadores fornecem um panorama mais completo do comportamento do AG ao longo das 100 execuções realizadas.
+
+A comparação entre as diferentes estratégias de controle populacional será conduzida com testes estatísticos para verificar a significância das diferenças observadas. Para métricas contínuas, como tempo de execução e número de gerações, serão aplicados testes \textit{z} com correção para amostras independentes, além do cálculo do tamanho de efeito de Cohen ($d$). Para as taxas de sucesso, será empregado um teste de diferença de proporções com a mesma distribuição de referência e o tamanho de efeito de Cohen ($h$). Esses recursos permitem avaliar não apenas a existência de diferenças, mas também sua magnitude prática.
+
+Os resultados serão apresentados por meio de tabelas, gráficos com barras de erro representando os intervalos de confiança e relatórios consolidados com os valores de $p$ e tamanhos de efeito. A análise buscará destacar tendências, padrões de comportamento entre os cenários experimentais e possíveis relações entre os parâmetros avaliados. Além disso, serão discutidas as implicações práticas das escolhas metodológicas adotadas, bem como suas contribuições para a compreensão do impacto das estratégias de controle populacional no desempenho de algoritmos genéticos.

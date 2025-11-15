@@ -1,0 +1,142 @@
+\section{Fundamentação Teórica}
+
+\subsection{Algoritmos Genéticos}
+
+Algoritmos Genéticos (AGs) são técnicas de busca e otimização baseadas nos princípios da evolução natural, como seleção, cruzamento e mutação. Propostos inicialmente por Holland na década de 1970~\cite{holland1975adaptation}, esses algoritmos operam sobre uma população de soluções candidatas — os indivíduos — que evoluem ao longo de várias gerações em direção a soluções mais adaptadas.
+
+Cada indivíduo é codificado de acordo com a estrutura do problema em questão e avaliado por uma função de aptidão (\textit{fitness}), que determina sua qualidade. Segundo Lacerda e Carvalho~\cite{lacerda1999introducao}, o desempenho dos AGs depende diretamente da escolha da codificação, da função de avaliação e dos operadores genéticos utilizados.
+
+O funcionamento de um algoritmo genético se baseia em um ciclo evolutivo composto por etapas bem definidas, que se repetem a cada geração. Essas etapas incluem:
+
+\begin{itemize}
+    \item \textbf{Inicialização}: geração aleatória da população inicial, o que assegura diversidade e ampla cobertura do espaço de busca;
+    \item \textbf{Avaliação}: cálculo da aptidão de cada indivíduo com base nos critérios definidos para o problema;
+    \item \textbf{Seleção}: escolha dos indivíduos mais aptos para reprodução;
+    \item \textbf{Cruzamento}: combinação de pares de indivíduos para gerar descendentes;
+    \item \textbf{Mutação}: introdução de pequenas alterações aleatórias nos indivíduos, essencial para manter a diversidade genética~\cite{spears1993crossover};
+    \item \textbf{Substituição}: definição de quais indivíduos permanecem na nova geração, com abordagens como elitismo, substituição total ou parcial.
+\end{itemize}
+
+A Figura~\ref{fig:fluxo_ag} ilustra esse ciclo evolutivo, evidenciando o fluxo entre as etapas principais do algoritmo genético.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.5cm and 1cm]
+
+% Estilos
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=6cm, minimum height=1cm, text centered, draw=black, fill=gray!20]
+\tikzstyle{process} = [rectangle, minimum width=6cm, minimum height=1cm, text centered, draw=black, fill=blue!15]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+% Nós do fluxo principal
+\node (start) [startstop] {Inicialização};
+\node (eval) [process, below of=start] {Avaliação da população};
+\node (select) [process, below of=eval] {Seleção dos indivíduos};
+\node (crossover) [process, below of=select] {Cruzamento};
+\node (mutation) [process, below of=crossover] {Mutação};
+\node (replace) [process, below of=mutation] {Substituição};
+\node (loop) [startstop, below of=replace] {Critério de parada?};
+\node (end) [startstop, below=1.5cm of loop] {Fim};
+
+% Setas principais
+\draw [arrow] (start) -- (eval);
+\draw [arrow] (eval) -- (select);
+\draw [arrow] (select) -- (crossover);
+\draw [arrow] (crossover) -- (mutation);
+\draw [arrow] (mutation) -- (replace);
+\draw [arrow] (replace) -- (loop);
+\draw [arrow] (loop) -- node[right] {Sim} (end);
+
+% Caminho de retorno (Não)
+\coordinate (rightloop) at ($(loop.east)+(2.2,0)$);
+\coordinate (righttop)  at ($(eval.east)+(2.2,0)$);
+
+\draw [arrow] (loop.east) -- (rightloop)
+      node[midway, below right] {Não}
+      |- (righttop)
+      -- (eval.east);
+
+\end{tikzpicture}
+\caption{Fluxograma do funcionamento do algoritmo genético.}
+\label{fig:fluxo_ag}
+\end{figure}
+
+
+\subsection{O Problema das \textit{n}-Rainhas}
+
+O problema das \textit{n}-rainhas consiste em posicionar \textit{n} rainhas em um tabuleiro de xadrez de dimensões \textit{n}×\textit{n} de forma que nenhuma delas possa atacar outra. Isso significa que não pode haver mais de uma rainha em qualquer linha, coluna ou diagonal~\cite{bell2009survey}. Proposto originalmente em 1848 por Max Bezzel e posteriormente analisado por matemáticos como Gauss e Nauck, esse problema possui uma longa tradição tanto na matemática recreativa quanto na ciência da computação~\cite{bell2009survey}.
+
+Apesar de sua formulação simples, o número de possíveis configurações cresce exponencialmente com o aumento de \textit{n}, tornando abordagens exaustivas inviáveis para valores elevados. Conforme demonstrado por Ali et al.~\cite{ali2023performance}, algoritmos clássicos como busca em largura (BFS) e busca em profundidade (DFS) são eficazes para instâncias pequenas, mas tornam-se computacionalmente custosos à medida que o tabuleiro cresce. A escalabilidade do problema, aliada à sua estrutura bem definida e múltiplas soluções conhecidas, faz dele um excelente benchmark para avaliar o desempenho de algoritmos de busca e otimização.
+
+Por essas razões, o problema das \textit{n}-rainhas tem sido amplamente adotado como ambiente de teste para algoritmos evolutivos e de busca heurística~\cite{sarkar2017adaptive, farhan2015solving, ali2023performance}. Sua natureza combinatória, aliada à clareza das restrições e à escalabilidade controlada, permite uma investigação aprofundada de estratégias de codificação, operadores genéticos e mecanismos de seleção em um contexto clássico e amplamente reconhecido na literatura.
+
+\begin{figure}[H]
+  \centering
+  \chessboard[
+    setpieces={Qa1,Qb5,Qc8,Qd6,Qe3,Qf7,Qg2,Qh4},
+    showmover=false,
+    label=true
+  ]
+  \caption{Exemplo de solução válida para o problema das 8-rainhas.}
+  \label{fig:tabuleiro-nrainhas}
+\end{figure}
+
+\subsection{Uso da Linguagem Python e Bibliotecas Relacionadas}
+
+A linguagem Python será adotada neste projeto para a implementação e execução dos experimentos com algoritmos genéticos. Sua escolha se justifica pela clareza sintática, ampla aceitação na comunidade científica e suporte a bibliotecas voltadas à análise de dados e visualização~\cite{python3reference}.
+
+Para gerar variabilidade genética e aplicar operadores estocásticos, será utilizado o módulo \texttt{random}, que oferece ferramentas para geração de números pseudoaleatórios, amostragem e embaralhamento de sequências~\cite{python3random}.
+
+A manipulação de vetores e matrizes será realizada com a biblioteca \texttt{NumPy}, que fornece estruturas otimizadas e operações vetorizadas de alto desempenho~\cite{harris2020array}. Essa ferramenta será fundamental para representar populações, aplicar operadores genéticos em escala e calcular a função de aptidão com eficiência.
+
+A cronometragem dos experimentos será feita com o módulo \texttt{time}, que permite medir o tempo de execução de forma precisa~\cite{python3time}. Já a análise visual dos resultados será conduzida com a biblioteca \texttt{matplotlib}, que oferece suporte à geração de gráficos científicos e facilita a interpretação das métricas obtidas~\cite{hunter2007matplotlib}.
+
+Esse conjunto de ferramentas proporcionará uma base robusta e reprodutível para o desenvolvimento do projeto e a apresentação dos resultados.
+
+\subsection{Trabalhos Relacionados}
+
+Diversos estudos têm investigado o impacto de variações nos operadores dos algoritmos genéticos (AGs) sobre o desempenho em problemas de otimização combinatória. A escolha da representação dos indivíduos, a estratégia de seleção, a taxa de mutação, bem como a forma de controle populacional, pode influenciar significativamente a eficácia do algoritmo.
+
+\subsubsection{Representações Binária e Inteira para o Problema das \textit{n}-Rainhas \cite{richter2012algoritmo}}
+
+Richter et al.~\cite{richter2012algoritmo} investigaram a aplicação de algoritmos genéticos (AGs) para resolver o problema das \textit{n}-rainhas, comparando duas abordagens distintas de representação dos indivíduos: uma baseada em codificação binária e outra utilizando números inteiros, denominada \textit{InOrder}. O estudo teve como objetivo desenvolver um framework adaptável para problemas similares, como o posicionamento de antenas, utilizando o problema das \textit{n}-rainhas como base experimental devido ao seu caráter combinatório exponencial.
+
+A implementação binária utiliza sequências de bits que representam a posição das rainhas, exigindo conversão para valores decimais e sendo suscetível a colisões horizontais. Já a abordagem \textit{InOrder} codifica diretamente a posição das rainhas por meio de números inteiros únicos em cada indivíduo, evitando conflitos de linha e coluna desde a geração inicial da população. Essa característica garantiu desempenho significativamente superior, especialmente em problemas com maior número de rainhas, como demonstrado nos testes com 16 posições.
+
+Os autores destacam que, apesar de ambas as representações seguirem os princípios clássicos da meta-heurística evolutiva --- incluindo seleção por torneio, cruzamento e mutação ---, a \textit{InOrder} se mostrou mais eficaz ao evitar soluções inviáveis desde o início do processo evolutivo, reduzindo o número de gerações necessárias para encontrar soluções válidas.
+
+O presente projeto se alinha à proposta de Richter et al.~\cite{richter2012algoritmo} ao utilizar o problema das \textit{n}-rainhas como instrumento de análise, mas avança ao comparar diferentes estratégias de controle populacional em algoritmos genéticos. Enquanto o trabalho citado foca na representação genética, esta pesquisa busca compreender o impacto de mecanismos como elitismo, substituição parcial e substituição total, ampliando assim o entendimento sobre a eficácia dos AGs em contextos de otimização combinatória.
+
+\subsubsection{Comparação entre Algoritmo Genético e Buscas Clássicas (BFS/DFS) \cite{ali2023performance}}
+
+Ali et al.~\cite{ali2023performance} realizaram um estudo comparativo entre algoritmos genéticos e técnicas clássicas de busca — busca em largura (BFS) e busca em profundidade (DFS) — aplicadas ao problema das \textit{n}-rainhas. O objetivo foi avaliar a eficácia desses métodos em diferentes tamanhos de tabuleiro e identificar os contextos nos quais os AGs apresentam vantagens reais sobre métodos tradicionais.
+
+O algoritmo genético proposto utiliza uma representação vetorial, onde cada cromossomo é uma string de tamanho $N$, em que cada posição representa a linha de uma rainha na respectiva coluna. A avaliação da aptidão baseia-se no número de pares de rainhas não conflitantes, sendo o valor ótimo aquele correspondente à combinação total de pares sem ataques. Foram utilizados operadores de seleção por torneio, cruzamento uniforme e mutação por redefinição aleatória, com taxa de mutação de 10\%.
+
+Nos experimentos realizados, os autores observaram que para instâncias pequenas (até 8 rainhas), BFS e DFS superaram o algoritmo genético em tempo de execução. No entanto, para problemas médios e grandes (acima de 10 rainhas), o AG apresentou melhor escalabilidade, com crescimento linear no tempo de execução, enquanto os métodos tradicionais exibiram crescimento exponencial.
+
+O estudo também evidencia a sensibilidade do desempenho do AG à configuração de seus hiperparâmetros, como a taxa de mutação. A aleatoriedade natural do algoritmo pode resultar em tempos de convergência variáveis, mas ajustes apropriados garantem sua eficiência.
+
+Este trabalho reforça o potencial dos AGs como alternativa viável em problemas de otimização combinatória de alta complexidade, especialmente em contextos onde técnicas exaustivas se tornam inviáveis. A presente pesquisa se inspira nesse estudo ao adotar o problema das \textit{n}-rainhas como banco de testes, focando na análise de estratégias de controle populacional em AGs.
+
+\subsubsection{Algoritmo Genético Adaptativo com Controle de Diversidade \cite{sarkar2017adaptive}}
+
+Sarkar e Nag~\cite{sarkar2017adaptive} propuseram uma abordagem adaptativa baseada em algoritmos genéticos para resolver o problema das \textit{n}-rainhas, com melhorias na função de aptidão e mecanismos de controle da diversidade populacional. O trabalho combina operadores clássicos com estratégias inovadoras para evitar o aprisionamento em ótimos locais — um desafio frequente em problemas combinatórios.
+
+A representação dos indivíduos é feita por permutações dos números de $1$ a $N$, garantindo que cada rainha ocupe uma coluna distinta. A função de aptidão penaliza conflitos diagonais, utilizando duas varreduras para detecção de ataques. Indivíduos com valor de aptidão igual a zero representam soluções válidas.
+
+O operador de cruzamento adotado é o \textit{Order 1 Crossover}, apropriado para permutações. A mutação consiste em trocas aleatórias de dois genes, com alta probabilidade (0.8), e uma variação adicional chamada \textit{mutação dupla}, com probabilidade de 0.4. Destaca-se ainda a introdução de um \textit{repositório de má população}, que armazena indivíduos menos aptos para manter a diversidade e evitar estagnações.
+
+Os resultados experimentais mostram que a abordagem encontra soluções ótimas para valores elevados de $N$ (até 100) com eficiência, sugerindo robustez da proposta. Os autores indicam ainda o potencial da metodologia para problemas reais de escalonamento.
+
+Este trabalho é relevante para a presente pesquisa por inspirar mecanismos internos de controle da diversidade e da pressão seletiva — elementos fundamentais para a eficiência de AGs em problemas complexos como o das \textit{n}-rainhas.
+
+\subsubsection{Busca de Todas as Soluções Válidas para as 8-Rainhas \cite{farhan2015solving}}
+
+Farhan et al.~\cite{farhan2015solving} propuseram um algoritmo genético focado em encontrar as 92 soluções válidas do problema das 8 rainhas. O destaque da proposta está na representação vetorial unidimensional, onde o índice do vetor representa a linha e o valor armazenado representa a coluna de cada rainha. Essa representação elimina conflitos em linhas e colunas, restringindo a função de aptidão à verificação de ataques diagonais.
+
+A função de aptidão contabiliza o número de pares de rainhas que se atacam diagonalmente. Um valor zero indica uma solução válida. A estrutura do AG segue os princípios tradicionais: geração de população inicial aleatória, seleção por torneio de três vias, cruzamento (incluindo o operador PMX) e mutação simples por troca de posições.
+
+O algoritmo foi executado até que todas as 92 soluções únicas fossem encontradas. Os resultados demonstram que o AG é capaz de explorar eficientemente o espaço de busca, embora a aleatoriedade influencie o número de iterações necessárias para encontrar cada solução.
+
+Este trabalho é pertinente ao presente estudo por enfatizar a cobertura completa do espaço de soluções e o uso de operadores eficazes. Além disso, reforça a capacidade dos AGs de encontrar múltiplas soluções sem a necessidade de estruturas complexas, servindo como referência para o desenvolvimento de abordagens evolutivas mais avançadas.

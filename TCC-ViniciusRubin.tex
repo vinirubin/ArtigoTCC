@@ -1,0 +1,48 @@
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+\usepackage{graphicx,url}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage{chessboard}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{float}
+
+\sloppy
+
+\title{Análise Comparativa de Estratégias de Controle Populacional em Algoritmos Genéticos aplicados ao Problema das N-Rainhas}
+
+\author{Vinícius Rubin\inst{1}, Igor Yepes\inst{1}}
+
+\address{Instituto de Educação, Ciência e Tecnologia Farroupilha - \\
+Campus Frederico Westphalen (IFFAR-FW)}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  This article investigates how different population control strategies affect the performance of genetic algorithms when solving the $n$-queens problem.
+  We describe the design of a baseline implementation, outline the experimental protocol, and discuss how metrics such as execution time, number of generations, and success rate will be interpreted.
+  The study aims to identify configurations that preserve diversity while accelerating convergence, contributing guidelines for practitioners who deploy evolutionary heuristics in combinatorial search tasks.
+\end{abstract}
+
+\begin{resumo}
+  Este artigo investiga como diferentes estratégias de controle populacional influenciam o desempenho de algoritmos genéticos na resolução do problema das $n$-rainhas.
+  São descritos o planejamento da implementação base, o protocolo experimental e a forma de análise de métricas como tempo de execução, número de gerações e taxa de sucesso.
+  O estudo busca apontar configurações que preservem a diversidade e acelerem a convergência, oferecendo subsídios para o emprego de heurísticas evolutivas em tarefas de busca combinatória.
+\end{resumo}
+
+\input{sections/introducao}
+\input{sections/fundamentacao}
+\input{sections/metodologia}
+\input{sections/desenvolvimento}
+\input{sections/conclusoes}
+
+\bibliographystyle{sbc}
+\bibliography{TCC-ViniciusRubin}
+
+\end{document}
