@@ -39,14 +39,16 @@ A mutação será realizada por meio da troca aleatória entre duas posições d
 
 \subsubsection{Substituição}
 
-Serão testadas três estratégias de substituição para controle populacional, cada uma combinando variações de tamanho populacional com ajustes de taxa de mutação e tamanho de torneio:
+Serão testadas quatro estratégias de substituição para controle populacional, cada uma combinando variações de tamanho populacional com ajustes de taxa de mutação e tamanho de torneio:
 
 \begin{itemize}
     \item \textbf{Substituição total}: toda a população é substituída pelos indivíduos gerados na iteração atual. Cada variação de tamanho populacional (100, 200 e 300 indivíduos) é avaliada com taxas de mutação de 10\%, 20\% e 30\%, combinadas com torneios binários de tamanho $k=2$;
 
     \item \textbf{Substituição parcial}: apenas uma fração da população é mantida, enquanto o restante é substituído. Serão testadas três variações de tamanho populacional (100, 200 e 300 indivíduos), três proporções de substituição (25\%, 50\% e 75\%) e as mesmas combinações de taxa de mutação com torneios binários de tamanho $k=2$ descritas anteriormente;
 
-    \item \textbf{Elitismo}: os melhores indivíduos da geração anterior são preservados e incorporados à nova população, garantindo que soluções de alta qualidade não sejam descartadas. Serão avaliadas três variações de tamanho populacional (100, 200 e 300 indivíduos), três proporções de elitismo (10\%, 20\% e 30\%) e as combinações de taxa de mutação com torneios binários de tamanho $k=2$ utilizadas nas demais estratégias.
+    \item \textbf{Elitismo}: os melhores indivíduos da geração anterior são preservados e incorporados à nova população, garantindo que soluções de alta qualidade não sejam descartadas. Serão avaliadas três variações de tamanho populacional (100, 200 e 300 indivíduos), três proporções de elitismo (10\%, 20\% e 30\%) e as combinações de taxa de mutação com torneios binários de tamanho $k=2$ utilizadas nas demais estratégias;
+
+    \item \textbf{Controle por idade}: inspirado nas propostas de Michalewicz~\cite{michalewicz1994gavaps}, adiciona limites de maturidade e longevidade para modular o tamanho efetivo da população. O conjunto de experimentos considera idades mínimas de maturidade de 2, 3 e 4 gerações, idades máximas de 20, 30 e 40 gerações, limites de descendentes por indivíduo iguais a 2 e 4 filhos e uma janela oscilante de população definida por \texttt{min\_population} em 60\% e \texttt{max\_population} em 120\% do tamanho populacional nominal. As taxas de mutação (10\%, 20\% e 30\%) e o torneio binário ($k=2$) permanecem alinhados ao GA base para permitir comparação direta.
 \end{itemize}
 
 \begin{table}[htbp]
@@ -69,9 +71,34 @@ Serão testadas três estratégias de substituição para controle populacional,
                                        & Tamanho da população      & 100, 200, 300 \\
                                        & Taxa de mutação           & 10\%, 20\%, 30\% \\
                                        & Tamanho do torneio ($k$)  & 2 \\
+\midrule
+\multirow{5}{*}{Controle por idade}    & Idade mínima de maturidade & 2, 3, 4 gerações \\
+                                       & Idade máxima              & 20, 30, 40 gerações \\
+                                       & Descendentes por indivíduo & 2, 4 \\
+                                       & Limites populacionais      & 60\% (mínimo), 120\% (máximo) do tamanho nominal \\
+                                       & Taxa de mutação / torneio  & 10\%, 20\%, 30\% e $k=2$ \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsubsection{Fluxo do algoritmo com controle por idade}
+
+Para permitir a comparação direta com as demais estratégias, a abordagem baseada em idade reutiliza os mesmos operadores de representação, seleção, cruzamento e mutação descritos anteriormente, acrescentando camadas de controle inspiradas na fundamentação teórica (Seção~\ref{sec:fundamentacao}). O ciclo evolutivo passa a incluir o rastreamento explícito da idade de cada indivíduo e o cumprimento dos limites mínimos e máximos de população estabelecidos pelos parâmetros \texttt{min\_population} e \texttt{max\_population}. A seguir é apresentado o fluxo adotado:
+
+\begin{enumerate}
+    \item Inicializar a população com permutações válidas, idade zero e limites individuais $(a_{\text{mat}}, a_{\text{max}})$ definidos pela configuração experimental.
+    \item Em cada geração:
+    \begin{enumerate}
+        \item Avaliar a aptidão de todos os indivíduos e incrementar sua idade.
+        \item Marcar para remoção aqueles cuja idade excede $a_{\text{max}}$ ou que ultrapassam o limite de descendentes estabelecido.
+        \item Formar o conjunto de pais utilizando apenas indivíduos com idade $\geq a_{\text{mat}}$, garantindo que cromossomos jovens amadureçam antes de se reproduzir.
+        \item Aplicar cruzamento OX e mutação por troca para gerar novos descendentes, que nascem com idade zero.
+        \item Executar a substituição priorizando (i) elites vivas, (ii) descendentes recém-criados e (iii) indivíduos reinicializados aleatoriamente quando a população cair abaixo de \texttt{min\_population}. Caso o número de indivíduos ultrapasse \texttt{max\_population}, os mais velhos são descartados primeiro.
+    \end{enumerate}
+    \item Encerrar o processo quando uma solução sem conflitos é encontrada ou quando o critério de parada global é atingido.
+\end{enumerate}
+
+Esse fluxo garante que a pressão seletiva permaneça comparável à dos demais cenários, mas incorpora o mecanismo de ``expiração'' descrito por Michalewicz, ampliando o escopo experimental para incluir populações dinâmicas.
 
 
 \subsection{Experimentos}
