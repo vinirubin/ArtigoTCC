@@ -1,4 +1,5 @@
 \section{Fundamentação Teórica}
+\label{sec:fundamentacao}
 
 \subsection{Algoritmos Genéticos}
 
@@ -151,36 +152,12 @@ Do ponto de vista biológico, o mecanismo procura evitar superpopulações envel
 
 \subsubsection{Dinâmica do Algoritmo Baseado em Idade}
 
-No contexto deste TCC, o ciclo de vida dos indivíduos passa a incluir atributos explícitos de idade. Cada cromossomo nasce com idade zero, envelhece a cada geração e só é elegível para reprodução após atingir uma idade de maturidade $a_{\text{mat}}$. A morte ocorre quando o indivíduo atinge a idade máxima $a_{\text{max}}$ ou quando ultrapassa um orçamento de gerações sem melhora de aptidão, o que evita que soluções estagnadas ocupem espaço indefinidamente. A política de substituição é conduzida em duas etapas: (i) todos os indivíduos cuja idade excede $a_{\text{max}}$ são marcados para remoção; (ii) vagas resultantes são preenchidas prioritariamente pelos descendentes recém-gerados e, caso sobrem posições, por indivíduos reinicializados aleatoriamente para repor diversidade. Essa lógica reproduz a essência do GAVaPS, em que a população oscila entre limites mínimos e máximos determinados implicitamente pelo número de mortes e nascimentos por geração. Regras adicionais, como a eliminação acelerada de indivíduos que já geraram um número máximo de descendentes ou que apresentem aptidão muito inferior à mediana, ajudam a reciclar rapidamente segmentos pouco promissores do espaço de busca.
+Independentemente da implementação específica, os esquemas baseados em idade compartilham um ciclo de vida composto por três momentos: nascimento, maturação e descarte. Cada novo indivíduo nasce com idade zero e só passa a contribuir para a evolução após atingir uma idade mínima de maturidade, conceito que impede que cromossomos recém-criados dominem a população antes de demonstrarem aptidão. O envelhecimento ocorre a cada geração e culmina na remoção automática quando a idade máxima é alcançada ou quando o indivíduo deixa de produzir descendentes relevantes. A população oscila entre limites mínimos e máximos definidos implicitamente pelos nascimentos e mortes, o que aproxima o comportamento computacional daquele observado em ecossistemas naturais descritos por Michalewicz~\cite{michalewicz1994gavaps}.
 
 \subsubsection{Comparação com o Algoritmo Base}
 
-Comparado ao GA atual, cuja substituição total/parcial e elitismo mantêm tamanhos fixos e privilégios permanentes para as melhores soluções, o controle por idade introduz um mecanismo de ``expiração'' natural das elites. Isso tende a preservar a diversidade por mais tempo porque cada geração necessariamente incorpora indivíduos jovens para suprir as vagas criadas pelas mortes programadas, reduzindo o risco de que a população se torne homogênea logo nas primeiras iterações. A convergência, por sua vez, torna-se menos abrupta: enquanto a pressão seletiva continua a favorecer bons indivíduos, eles precisam manter desempenho alto antes de envelhecer demais, o que estimula a busca contínua por refinamentos. Em termos de tempo de execução, há um pequeno acréscimo decorrente do gerenciamento das idades e das listas de remoção, mas o custo permanece linear no tamanho da população e tende a ser compensado por reduções no número total de gerações quando o algoritmo deixa de estagnar. Esse arranjo é particularmente vantajoso em cenários onde o elitismo clássico falha, como problemas com muitos ótimos locais ou com hipersuperfícies descontínuas; nesses casos, liberar espaço periodicamente para novos indivíduos é mais eficaz do que apenas proteger um subconjunto fixo da população.
+Ao contrário das estratégias tradicionais de substituição total, parcial ou elitismo, que mantêm o tamanho da população fixo e preservam elites indefinidamente, o controle por idade impõe uma ``data de validade'' para cada cromossomo. Esse mecanismo favorece a diversidade porque novas soluções precisam ocupar o espaço deixado por indivíduos que envelhecem, reduzindo a probabilidade de homogeneização precoce. A pressão seletiva também se torna dinâmica: bons indivíduos continuam relevantes, mas precisam comprovar desempenho antes que o envelhecimento os retire de cena. Essas características tornam o paradigma especialmente atrativo para problemas com muitos ótimos locais, pois a renovação constante ajuda o algoritmo a escapar de estagnações prolongadas.
 
-\subsubsection{Adaptações Metodológicas e Pseudocódigo}
+\subsubsection{Conexão com a Metodologia}
 
-A incorporação do controle por idade exige ajustes estruturais na implementação descrita na Seção~\ref{sec:metodologia}. Primeiramente, o indivíduo passa a armazenar novos campos: \texttt{age} (idade atual), \texttt{age\_limit} (máximo permitido), \texttt{maturity} (idade mínima para participar de cruzamentos) e \texttt{offspring\_count} (contador auxiliar para restringir o número de descendentes de elites longevas). Variáveis globais complementares definem os parâmetros \texttt{age\_increment}, \texttt{max\_age}, \texttt{min\_population} e \texttt{max\_population}, que compõem o envelope no qual a população pode oscilar. No loop evolutivo, adiciona-se uma etapa explícita de envelhecimento logo após a avaliação, seguida da filtragem de indivíduos mortos. A seleção por torneio passa a considerar apenas cromossomos com idade $\geq a_{\text{mat}}$, redirecionando o restante para uma fila de espera que envelhece até se tornar apta. O cruzamento e a mutação continuam operando sobre permutações, mas recebem metadados de idade para inicializar os descendentes em zero e, opcionalmente, herdar limites personalizados quando a aplicação exigir. Finalmente, a rotina de substituição preenche a população na ordem: elites vivas, descendentes gerados, reinicializações aleatórias necessárias para garantir que a população não caia abaixo de \texttt{min\_population}.
-
-Essas modificações podem ser sintetizadas pelo pseudocódigo a seguir, que preserva os operadores descritos na metodologia original e acrescenta as regras etárias discutidas nesta subseção:
-
-\begin{flushleft}
-\textbf{Pseudocódigo do AG com controle por idade}
-\begin{enumerate}
-    \item Inicializar população $P$ com permutações válidas, idade $0$ e limites $(a_{\text{mat}}, a_{\text{max}})$.
-    \item \textbf{Enquanto} critério de parada não for satisfeito \textbf{faça}:
-    \begin{enumerate}
-        \item Avaliar aptidão de todos os indivíduos.
-        \item Incrementar idade dos indivíduos e marcar para remoção aqueles com idade $> a_{\text{max}}$ ou com estagnação prolongada.
-        \item Construir $P_{\text{maduros}} = \{p \in P \mid \text{idade}(p) \geq a_{\text{mat}}\}$.
-        \item Aplicar seleção por torneio em $P_{\text{maduros}}$ até formar o conjunto de pais.
-        \item Gerar descendentes por OX, aplicar mutação por troca e definir idade $0$ para cada filho.
-        \item Atualizar contador de descendentes dos pais e marcar para morte antecipada quem exceder o limite permitido.
-        \item Remover indivíduos marcados e inserir descendentes até alcançar $|P| \leq \texttt{max\_population}$.
-        \item Se $|P| < \texttt{min\_population}$, preencher com novos indivíduos aleatórios (idade $0$).
-        \item Preservar elites apenas enquanto estiverem abaixo do limite etário, garantindo que envelheçam e eventualmente sejam removidas.
-    \end{enumerate}
-    \item Retornar a melhor solução encontrada.
-\end{enumerate}
-\end{flushleft}
-
-Esse roteiro mantém compatibilidade com as medições planejadas (tempo, gerações e taxa de sucesso) e amplia o escopo experimental ao permitir comparar diretamente o GA base com uma família de estratégias derivadas da proposta de Michalewicz.
+As ideias discutidas nesta subseção fornecem a base conceitual para a estratégia adicional de controle populacional descrita na Seção~\ref{sec:metodologia}. É lá que são apresentadas as parametrizações específicas adotadas neste trabalho e o fluxo completo do algoritmo com envelhecimento explícito, alinhando a fundamentação teórica ao desenho experimental.
