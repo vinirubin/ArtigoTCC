@@ -17,10 +17,10 @@ Quatro mecanismos são comparados:
     \item \textbf{Substituição total}: toda a população é renovada a cada geração.  
     \item \textbf{Substituição parcial}: uma fração dos indivíduos é preservada e o restante substituído.  
     \item \textbf{Elitismo}: uma porcentagem dos melhores indivíduos é garantida na nova geração.  
-    \item \textbf{Controle por idade}: indivíduos possuem tempo de vida limitado, calculado a partir da aptidão, sendo removidos quando ultrapassam seu \textit{lifetime}.  
+    \item \textbf{Controle por idade}: indivíduos possuem tempo de vida limitado, calculado a partir da aptidão, sendo removidos quando ultrapassam seu \textit{lifetime}, e a população pode crescer ou encolher dinamicamente ao longo das gerações.  
 \end{itemize}
 
-Os tamanhos populacionais avaliados (100, 200, 300) representam três escalas típicas na prática de AGs — pequena, média e maior — permitindo observar como a quantidade de indivíduos interage com cada política de substituição.
+Os tamanhos populacionais avaliados (100, 200, 300) representam três escalas típicas na prática de AGs — pequena, média e maior — permitindo observar como a quantidade de indivíduos interage com cada política de substituição nas estratégias de população fixa. No caso do controle por idade, esses valores são utilizados como tamanho inicial da população, que passa a variar dinamicamente durante a execução.
 
 A Tabela~\ref{tab:estrategias} resume os parâmetros específicos de cada mecanismo.
 
@@ -43,20 +43,30 @@ Elitismo            & Fração de elite      & 10\%, 20\%, 30\% \\
 \midrule
 Controle por idade  & Lifetime             & $L_{\min}=1$, $L_{\max}=5$ \\
                     & Taxa de reprodução   & 0{,}5 \\
-                    & Tamanho da população & 100, 200, 300 \\
+                    & Tamanho inicial da população & 100, 200, 300 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Controle por Idade no Contexto Experimental}
 
-O mecanismo utilizado neste trabalho segue o modelo descrito na Seção~\ref{sec:fundamentacao}. Após a avaliação da população, o lifetime de cada indivíduo é recalculado com base no intervalo de aptidões; a idade aumenta uma unidade; e indivíduos cuja idade ultrapassa o lifetime são removidos. Em seguida, são criados
+O mecanismo utilizado neste trabalho segue o modelo descrito na Seção~\ref{sec:fundamentacao}. Após a avaliação da população, o \textit{lifetime} de cada indivíduo é recalculado por uma função bi-linear em função do intervalo de aptidões; a idade é incrementada em uma unidade; e indivíduos cuja idade ultrapassa o seu \textit{lifetime} são removidos.
+
+Seja $S$ o número de sobreviventes após essa etapa. A partir deles, são gerados novos indivíduos por cruzamento, de acordo com uma taxa de reprodução fixa $\tau = 0{,}5$:
 
 \[
-N_{\text{novos}} = \left\lceil 0.5 \cdot S \right\rceil,
+N_{\text{novos}} = \left\lfloor \tau \cdot S \right\rceil,
 \]
 
-onde $S$ é o número de sobreviventes, complementando-se a população com reinicializações aleatórias quando necessário. Representação, seleção, cruzamento e mutação permanecem idênticos aos das demais estratégias.
+onde $\lfloor \cdot \rceil$ denota arredondamento para o inteiro mais próximo. A nova população passa a ter tamanho
+
+\[
+\text{Pop}(t+1) = S + N_{\text{novos}},
+\]
+
+permitindo que a população aumente ou diminua ao longo do tempo, de acordo com a dinâmica de sobrevivência e reprodução. Representação, seleção, cruzamento e mutação permanecem idênticos aos das demais estratégias.  
+
+Caso todos os indivíduos sejam eliminados em uma geração ($S = 0$), é aplicada uma reinicialização completa da população, gerando um novo conjunto de indivíduos aleatórios com o mesmo tamanho inicial, de modo a evitar estagnação irrecuperável.
 
 \subsection{Experimentos}
 
@@ -64,7 +74,7 @@ Para cada combinação de:
 
 \begin{itemize}
     \item estratégia de controle populacional,
-    \item tamanho da população (100, 200, 300),
+    \item tamanho da população inicial (100, 200, 300),
 \end{itemize}
 
 são realizadas \textbf{100 execuções independentes} para cada valor de $n$.  
@@ -76,21 +86,23 @@ Cada execução é encerrada quando:
 
 \begin{itemize}
     \item uma solução válida (aptidão zero) é encontrada; ou
-    \item o algoritmo atinge o limite de \textbf{1.000 gerações}.
+    \item o algoritmo atinge o limite de \textbf{1.000 gerações}; ou
+    \item o tempo de execução atinge um limite máximo pré-definido $T_{\max}$ = 10 s (limite de tempo por execução).
 \end{itemize}
 
-Esse limite é amplamente utilizado em estudos experimentais com AGs e atua como barreira computacional uniforme, evitando que execuções divergentes distorçam as métricas de tempo e esforço evolutivo. Não são utilizados critérios baseados em taxa de sucesso ou limiares arbitrários.
+O valor de $T_{\max}$ é mantido constante para todas as estratégias e configurações de tamanho de população, funcionando como uma barreira computacional uniforme. Esse controle adicional é particularmente relevante para o mecanismo de controle por idade, cujo custo computacional por geração é maior devido à gestão dinâmica de idade, \textit{lifetime} e tamanho populacional. Assim, evita-se que execuções muito lentas distorçam as métricas de tempo e esforço evolutivo.
 
 \subsubsection*{Métricas coletadas}
 
 Para cada execução, registram-se:
 
 \begin{itemize}
-    \item \textbf{Tempo de execução};
+    \item \textbf{Tempo de execução total};
     \item \textbf{Número de gerações até a solução ou até o limite};
-    \item \textbf{Indicador de sucesso} (solução encontrada dentro de 1.000 gerações).
+    \item \textbf{Indicador de sucesso} (solução encontrada antes de atingir qualquer limite);
+    \item \textbf{Critério de parada acionado} (solução, limite de gerações ou limite de tempo).
 \end{itemize}
 
 \subsection{Ambiente de Execução e Análise Estatística}
 
-Os experimentos são implementados em \texttt{Python} utilizando \texttt{numpy}, \texttt{numba}, \texttt{matplotlib}, \texttt{argparse} e \texttt{psutil}. A geração de aleatoriedade utiliza \texttt{numpy.random.default\_rng}, com registro explícito da semente para garantir reprodutibilidade.
+Os experimentos são implementados em \texttt{Python} utilizando \texttt{numpy}, \texttt{numba}, \texttt{matplotlib}, \texttt{argparse} e \texttt{psutil}. A geração de aleatoriedade utiliza \texttt{numpy.random.default\_rng}, com registro explícito da semente para garantir reprodutibilidade. As análises estatísticas consideram tanto medidas de desempenho (tempo, gerações, taxa de sucesso) quanto o impacto do critério de parada por tempo sobre cada estratégia de controle populacional.

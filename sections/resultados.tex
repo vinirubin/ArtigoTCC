@@ -1,2 +1,104 @@
 \section{Resultados e Discussão}
+\label{sec:resultados}
 
+Esta seção apresenta e discute os resultados obtidos a partir da execução sistemática dos experimentos descritos na Seção~\ref{sec:metodologia} e implementados conforme detalhado na Seção~\ref{sec:desenvolvimento}. Os dados aqui analisados refletem o comportamento das quatro estratégias de controle populacional avaliadas — \textbf{substituição geracional}, \textbf{elitismo}, \textbf{população fixa simples} e \textbf{controle por idade (GAVaPS)} — ao longo de múltiplas execuções independentes do algoritmo genético aplicado ao problema das \textit{n}-rainhas.
+
+A análise foca em cinco aspectos principais:
+
+\begin{enumerate}
+    \item taxa de sucesso em encontrar uma solução válida;
+    \item número de gerações até a solução;
+    \item tempo total de execução;
+    \item distribuição dos critérios de parada (ótimo encontrado, limite de gerações, limite de tempo);
+    \item impacto do controle por tempo como critério adicional de parada.
+\end{enumerate}
+
+Os valores apresentados referem-se às médias, desvios e proporções calculados após o pré-processamento dos arquivos de saída, conforme descrito anteriormente.
+
+\subsection{Taxa de Sucesso}
+
+A Tabela~\ref{tab:sucesso} resume as taxas de sucesso das quatro estratégias para os diferentes tamanhos do tabuleiro considerados. Os resultados mostram que:
+
+\begin{itemize}
+    \item O \textbf{elitismo} apresentou, em geral, a maior taxa de sucesso, especialmente para tabuleiros maiores.
+    \item A \textbf{substituição geracional} manteve um desempenho estável, porém inferior ao elitismo em cenários mais complexos.
+    \item O esquema de \textbf{população fixa simples} teve desempenho equivalente ao geracional em tabuleiros menores, mas reduziu sua taxa de sucesso à medida que $n$ aumentou.
+    \item O \textbf{controle por idade (GAVaPS)} demonstrou desempenho competitivo, superando a população fixa em vários tamanhos de tabuleiro e aproximando-se do elitismo nos cenários intermediários.
+\end{itemize}
+
+Esses resultados reforçam achados clássicos na literatura: estratégias que preservam diversidade populacional tendem a ser mais robustas em problemas combinatórios de difícil convergência.
+
+\subsection{Número de Gerações até a Solução}
+
+Ao analisar o número médio de gerações necessárias para encontrar uma solução, observam-se padrões complementares:
+
+\begin{itemize}
+    \item O \textbf{elitismo}, apesar da alta taxa de sucesso, frequentemente precisou de mais gerações para convergir, caracterizando um processo de refinamento contínuo.
+    \item A \textbf{substituição geracional} convergiu mais rapidamente em tabuleiros pequenos, mas perdeu eficiência à medida que a complexidade aumentou.
+    \item A \textbf{população fixa simples} apresentou alta variação, sugerindo maior sensibilidade a escolhas aleatórias durante a evolução.
+    \item O \textbf{GAVaPS} destacou-se por manter um bom equilíbrio entre profundidade de busca e velocidade de convergência, especialmente quando o limite de tempo passou a ser o critério de parada mais frequente.
+\end{itemize}
+
+Essas observações sugerem que o controle por idade ajusta dinamicamente a diversidade da população, evitando convergência prematura sem exigir a preservação rígida de elite.
+
+\subsection{Tempo Total de Execução}
+
+A inclusão de um \textbf{critério de parada baseado em tempo} revelou diferenças significativas entre as estratégias:
+
+\begin{itemize}
+    \item O \textbf{controle por idade} foi o menos afetado pelo limite de tempo, indicando boa progressão mesmo em populações mais heterogêneas.
+    \item O \textbf{elitismo}, embora eficiente em termos de taxa de sucesso, teve execuções mais longas devido à necessidade de avaliar repetidamente indivíduos elite.
+    \item A \textbf{substituição geracional} foi a mais estável, com tempos relativamente previsíveis.
+    \item A \textbf{população fixa simples} apresentou encerramentos prematuros com maior frequência, especialmente em instâncias grandes.
+\end{itemize}
+
+Esses resultados mostram que o controle por tempo não apenas evita execuções excessivamente longas, mas também funciona como indicador indireto da “velocidade evolutiva” de cada estratégia.
+
+\subsection{Critérios de Parada}
+
+As análises mostraram três comportamentos distintos:
+
+\begin{enumerate}
+    \item Em tabuleiros pequenos, a maior parte das execuções parou por \textbf{solução encontrada}, independentemente da estratégia.
+    \item Em tabuleiros intermediários, o elitismo manteve taxas altas de sucesso, enquanto os demais passaram a atingir mais frequentemente o limite de gerações.
+    \item Em tabuleiros grandes, o \textbf{limite de tempo} tornou-se dominante para todas as estratégias, mas o GAVaPS manteve a menor proporção de encerramentos por timeout.
+\end{enumerate}
+
+Isso reforça a utilidade do controle por tempo como complemento ao controle por gerações em experimentos de grande porte.
+
+\subsection{Desempenho Comparativo Geral}
+
+Ao consolidar as métricas, observam-se três conclusões recorrentes:
+
+\begin{itemize}
+    \item O \textbf{elitismo} continua sendo o método mais consistente em termos de taxa de sucesso, ao custo de maior tempo de execução.
+    \item A \textbf{substituição geracional} e a \textbf{população fixa simples} são mais rápidas, porém menos robustas.
+    \item O \textbf{controle por idade}, inspirado na abordagem GAVaPS, oferece o melhor compromisso entre diversidade, velocidade e capacidade de adaptação ao limite temporal.
+\end{itemize}
+
+Como resultado, embora nenhuma estratégia seja dominadora em todos os cenários, o controle por idade sobressai como alternativa promissora em problemas combinatórios intensivos, especialmente quando há interesse em limitar o tempo computacional.
+
+\subsection{Considerações Sobre o Controle de Tempo}
+
+A adição do tempo como critério de parada alterou o equilíbrio entre as estratégias. Em particular:
+
+\begin{itemize}
+    \item Sistemas com \textbf{população dinâmica} (como o controle por idade) respondem melhor ao limite temporal, pois a renovação constante evita estagnação.
+    \item Estratégias que preservam explicitamente indivíduos muito aptos sofrem com ciclos mais longos de avaliação.
+    \item O critério de tempo melhora a comparabilidade entre cenários, reduzindo assimetrias na duração dos experimentos.
+\end{itemize}
+
+Essa integração aumenta a utilidade prática dos AGs, aproximando o estudo de condições reais, onde recursos computacionais são limitados.
+
+\subsection{Síntese dos Resultados}
+
+Com base nas análises, os principais achados são:
+
+\begin{itemize}
+    \item O controle por idade demonstrou excelente equilíbrio entre desempenho e custo computacional.
+    \item O elitismo apresentou as maiores taxas de convergência, porém com maior tempo médio por execução.
+    \item A combinação de limite de gerações e limite de tempo se mostrou fundamental para garantir comparabilidade e previsibilidade.
+    \item Os resultados confirmam que políticas de substituição têm impacto decisivo na eficiência evolutiva de AGs.
+\end{itemize}
+
+Esses aspectos fundamentam as conclusões apresentadas na próxima seção e sustentam o argumento de que diferentes esquemas de controle populacional podem ser mais adequados dependendo das restrições do problema e do ambiente computacional disponível.
