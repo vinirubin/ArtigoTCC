@@ -1,11 +1,24 @@
 \section{Introdução}
 
-Algoritmos Genéticos (AGs) são heurísticas evolutivas baseadas em seleção natural, amplamente utilizadas para otimização em espaços de busca complexos~\cite{eiben2015introduction}. A capacidade de combinar exploração estocástica com operadores simples de reprodução torna esses algoritmos versáteis em aplicações que vão de problemas combinatórios a tarefas de engenharia e inteligência artificial.
+Algoritmos Genéticos (AGs) são métodos de busca inspirados nos mecanismos de evolução natural, amplamente empregados na resolução de problemas complexos devido à sua capacidade de equilibrar exploração estocástica e intensificação por meio de operadores simples de reprodução \cite{eiben2015introduction, holland1975adaptation}. Esses algoritmos têm sido aplicados em diversas áreas — de problemas combinatórios clássicos a sistemas de engenharia — e sua eficiência depende de um conjunto de decisões de projeto que afetam diretamente o processo evolutivo.
 
-Entre os elementos que influenciam o desempenho dos AGs, o \textit{controle populacional} — isto é, o modo como indivíduos são mantidos, removidos ou substituídos ao longo das gerações — desempenha papel central. Estratégias como substituição total, substituição parcial, elitismo e abordagens baseadas em ciclos de vida têm sido utilizadas na prática, mas a literatura apresenta resultados heterogêneos, conduzidos em contextos experimentais distintos e com ausência de padronização. Como consequência, ainda é difícil comparar, de forma direta e controlada, o impacto real de cada mecanismo no comportamento do algoritmo.
+Entre esses componentes, o controle populacional destaca-se como um dos fatores menos padronizados e, ao mesmo tempo, mais influentes no comportamento dos AGs. Esse mecanismo determina como indivíduos são preservados, substituídos ou eliminados ao longo das gerações, afetando diversidade, pressão seletiva, estabilidade evolutiva e risco de convergência prematura. Embora estratégias como substituição total, substituição parcial, elitismo e técnicas baseadas em ciclos de vida sejam amplamente relatadas na literatura, comparações diretas entre elas são raras. Os estudos existentes geralmente variam simultaneamente representação, operadores ou configurações experimentais, o que dificulta isolar o impacto específico da política de substituição.
 
-Essa lacuna motiva o presente estudo, cujo objetivo é \textbf{comparar sistematicamente diferentes estratégias de controle populacional em um mesmo cenário experimental}, mantendo constantes todos os demais componentes do AG (representação, seleção, cruzamento e mutação). Para isso, utiliza-se o problema das \textit{n}-rainhas como ambiente de teste, um benchmark clássico pela sua estrutura simples, escalabilidade controlada e ampla adoção em estudos de otimização.
+Essa ausência de padronização configura uma lacuna importante na área: ainda não está claro, sob condições controladas, como diferentes estratégias de controle populacional influenciam taxa de sucesso, custo computacional e profundidade de busca em AGs. Assim, surge a seguinte pergunta de pesquisa:
 
-A contribuição deste trabalho é dupla: (i) oferecer uma avaliação empírica rigorosa de quatro mecanismos de controle populacional — substituição total, substituição parcial, elitismo e uma abordagem baseada em idade — sob condições experimentais uniformes; e (ii) analisar como cada estratégia afeta taxa de sucesso, esforço evolutivo e custo computacional à medida que a dificuldade do problema aumenta.
+\begin{quote}
+\centering
+\textit{Como diferentes estratégias de controle populacional afetam o desempenho de Algoritmos Genéticos quando todos os demais componentes do algoritmo permanecem constantes?}
+\end{quote}
 
-Os experimentos são conduzidos com múltiplas execuções independentes para cada configuração, permitindo estimar médias, variâncias e intervalos de confiança, além de aplicar testes estatísticos para comparação entre estratégias. Essa estrutura experimental fornece evidências quantitativas que auxiliam na escolha de mecanismos mais adequados para AGs aplicados a problemas combinatórios semelhantes.
+Para investigar essa questão, este trabalho realiza uma comparação sistemática entre quatro mecanismos de controle populacional — substituição total, substituição parcial, elitismo e uma abordagem baseada em idade inspirada no modelo GAVaPS — mantendo fixos representação, função de aptidão, seleção, cruzamento e mutação. O problema das \textit{n}-rainhas é adotado como cenário experimental por constituir um benchmark clássico, escalável e amplamente utilizado na avaliação de heurísticas evolutivas.
+
+A contribuição principal deste estudo consiste em fornecer uma análise empírica rigorosa e reprodutível sobre o efeito de diferentes políticas de substituição na dinâmica evolutiva dos AGs. Especificamente, o trabalho:
+
+\begin{enumerate}
+\item compara, sob condições uniformes, o desempenho de quatro estratégias de controle populacional;
+\item avalia como cada mecanismo influencia taxa de sucesso, número de gerações, tempo de execução e limites de parada;
+\item discute vantagens, limitações e cenários de aplicação de cada abordagem.
+\end{enumerate}
+
+Os experimentos incluem múltiplas execuções independentes por configuração e utilizam critérios híbridos de parada (tempo, geração máxima e solução encontrada), possibilitando medir médias, variâncias e padrões de comportamento evolutivo. Essa estrutura fornece evidências quantitativas que auxiliam na escolha da estratégia de controle populacional mais adequada para problemas combinatórios de natureza semelhante.

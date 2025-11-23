@@ -1,22 +1,69 @@
 \section{Fundamentação Teórica}
 \label{sec:fundamentacao}
 
+A fundamentação teórica deste trabalho aborda os conceitos essenciais para compreender o funcionamento dos Algoritmos Genéticos (AGs) e sua aplicação ao problema das \textit{n}-rainhas, bem como os principais elementos estruturais que orientam a condução dos experimentos apresentados. Inicialmente, são discutidos os princípios básicos dos AGs, destacando-se sua inspiração biológica e os componentes fundamentais que determinam seu comportamento evolutivo. Em seguida, apresenta-se o fluxo geral de execução de um AG clássico, incluindo um pseudocódigo que servirá de referência para todas as variantes analisadas ao longo deste estudo.
+
+O problema das \textit{n}-rainhas é então revisitado como cenário experimental amplamente utilizado na literatura devido à sua natureza combinatória e à capacidade de parametrização da dificuldade. Posteriormente, descreve-se o ambiente computacional adotado — baseado na linguagem Python e em bibliotecas numéricas — utilizado para garantir reprodutibilidade e eficiência nas análises. Por fim, detalham-se as estratégias de controle populacional investigadas, incluindo abordagens clássicas (substituição total, substituição parcial e elitismo) e uma técnica inspirada no modelo GAVaPS, que introduz controle por idade como forma de manutenção e renovação da população. Essa organização fornece a base conceitual necessária para compreender a motivação, execução e análise dos experimentos desenvolvidos ao longo do trabalho.
+
 \subsection{Algoritmos Genéticos}
 
-Algoritmos Genéticos (AGs) são meta-heurísticas inspiradas em princípios de evolução biológica, nas quais uma população de soluções candidatas é iterativamente modificada por operadores de seleção, cruzamento e mutação~\cite{eiben2015introduction, holland1975adaptation}. Cada indivíduo é avaliado por uma função de aptidão (\textit{fitness}), e o processo evolutivo tende a favorecer configurações de melhor desempenho.
+Algoritmos Genéticos (AGs) são meta-heurísticas inspiradas em princípios de evolução biológica, nas quais uma população de soluções candidatas é iterativamente modificada por operadores de seleção, cruzamento e mutação~\cite{eiben2015introduction, holland1975adaptation}. Cada indivíduo é avaliado por uma função de aptidão (\textit{fitness}), e o processo evolutivo tende a favorecer configurações de melhor desempenho ao longo das gerações.
 
-O comportamento de um AG é fortemente influenciado por três grupos de decisões: (i) representação dos indivíduos, (ii) função de avaliação e (iii) desenho dos operadores e da política de substituição~\cite{lacerda1999introducao}. Enquanto representação e operadores de cruzamento/mutação são amplamente discutidos na literatura, o \textit{controle populacional} — isto é, a forma como a população é renovada e mantida ao longo das gerações — recebe tratamento menos sistemático, embora esteja diretamente ligado à diversidade, à convergência e ao risco de aprisionamento em ótimos locais.
+O comportamento de um AG é fortemente influenciado por três grupos de decisões:  
+(i) representação dos indivíduos,  
+(ii) função de avaliação e  
+(iii) operadores evolutivos e política de substituição~\cite{lacerda1999introducao}.  
 
-Neste trabalho, representação, função de aptidão, seleção, cruzamento e mutação são mantidos fixos, e o foco recai justamente sobre o componente de controle populacional, comparando diferentes mecanismos de substituição em um cenário experimental comum.
+Enquanto representação e operadores de cruzamento/mutação são amplamente discutidos na literatura, o \textit{controle populacional} — isto é, a forma como indivíduos são mantidos, substituídos, removidos ou preservados — recebe tratamento menos sistemático, embora influencie diretamente diversidade, convergência e risco de aprisionamento em ótimos locais.  
 
+Neste trabalho, representação, função de aptidão, seleção, cruzamento e mutação permanecem fixos. O foco recai exclusivamente sobre o componente de controle populacional, permitindo isolar e mensurar o impacto de diferentes políticas de substituição no desempenho geral do algoritmo.
+
+\subsection{Fluxo Geral de um Algoritmo Genético}
+
+Embora diferentes variantes existam, o fluxo de execução de um AG tradicional segue uma estrutura geral bem definida. O pseudocódigo abaixo resume esse processo:
+
+\Needspace{20\baselineskip}
+
+\begin{algorithm}[H]
+\caption{Pseudocódigo de um Algoritmo Genético Clássico}
+\label{alg:ag-classico}
+\begin{algorithmic}[1]
+\Statex \textbf{Entrada:} tamanho populacional $N$, número máximo de gerações $G_{\max}$, operadores genéticos
+\Statex \textbf{Saída:} melhor solução encontrada
+\Statex
+
+\State Inicializar população $P$ com $N$ indivíduos
+\State Avaliar $P$
+\For{$g = 1$ até $G_{\max}$}
+    \Statex \textbf{// Seleção e Reprodução}
+    \State Selecionar pais usando torneio (ou outro método)
+    \State Aplicar cruzamento para gerar descendentes
+    \State Aplicar mutação aos descendentes
+    \State Avaliar descendentes
+
+    \Statex \textbf{// Controle Populacional}
+    \State Combinar populações conforme a estratégia escolhida:
+    \Statex \quad -- substituição total, ou
+    \Statex \quad -- substituição parcial, ou
+    \Statex \quad -- elitismo, ou
+    \Statex \quad -- controle por idade (GAVaPS/Michalewicz)
+
+    \State Atualizar população $P$
+\EndFor
+\State Retornar melhor indivíduo de $P$
+\end{algorithmic}
+\end{algorithm}
+
+Esse pseudocódigo será utilizado como base para todas as variações testadas neste estudo, modificando-se apenas a estratégia de controle populacional aplicada em cada experimento.
 
 \subsection{O Problema das \textit{n}-Rainhas}
 
-O problema das \textit{n}-rainhas consiste em posicionar \textit{n} rainhas em um tabuleiro de xadrez de dimensões \textit{n}×\textit{n} de forma que nenhuma delas ataque outra, o que implica ausência de conflitos em linhas, colunas e diagonais~\cite{bell2009survey}. Apesar da descrição simples, o número de configurações possíveis cresce rapidamente com \textit{n}, tornando abordagens exaustivas impraticáveis para valores mais elevados.
+O problema das \textit{n}-rainhas consiste em posicionar \textit{n} rainhas em um tabuleiro de xadrez de dimensões \textit{n}×\textit{n} de forma que nenhuma delas ataque outra, o que implica ausência de conflitos em linhas, colunas e diagonais~\cite{bell2009survey}. Embora a formulação seja simples, o número de configurações possíveis cresce rapidamente com \textit{n}, tornando abordagens exaustivas inviáveis para instâncias maiores.
 
-Estudos como o de Ali et al.~\cite{ali2023performance} mostram que técnicas clássicas de busca (BFS, DFS) são eficazes apenas para instâncias pequenas, perdendo viabilidade à medida que o tabuleiro cresce. Em contrapartida, o problema possui estrutura bem definida, múltiplas soluções conhecidas e um parâmetro de dificuldade ($n$) facilmente ajustável. Por isso, é amplamente adotado como \textit{benchmark} em experimentos com heurísticas e meta-heurísticas, incluindo AGs~\cite{sarkar2017adaptive, farhan2015solving, ali2023performance}.
+Estudos como o de Ali et al.~\cite{ali2023performance} mostram que buscas clássicas (BFS/DFS) são eficientes apenas para instâncias pequenas, tornando o problema ideal para testar meta-heurísticas devido ao equilíbrio entre dificuldade controlável e estrutura combinatória clara.  
+O problema é amplamente utilizado como \textit{benchmark} em estudos sobre AGs~\cite{sarkar2017adaptive, farhan2015solving}, permitindo comparação direta com trabalhos da literatura.
 
-Neste estudo, o problema das \textit{n}-rainhas é utilizado como ambiente de teste justamente por combinar simplicidade conceitual, escalabilidade controlada e ampla presença na literatura, o que facilita a comparação dos resultados obtidos com trabalhos anteriores.
+No presente estudo, utilizamos o problema das \textit{n}-rainhas como cenário experimental para avaliar diferentes estratégias de controle populacional.
 
 \begin{figure}[H]
   \centering
@@ -29,13 +76,85 @@ Neste estudo, o problema das \textit{n}-rainhas é utilizado como ambiente de te
   \label{fig:tabuleiro-nrainhas}
 \end{figure}
 
-
 \subsection{Uso da Linguagem Python e Bibliotecas Relacionadas}
 
-A implementação dos experimentos é realizada em \texttt{Python}, linguagem amplamente utilizada em computação científica devido à clareza sintática e à disponibilidade de bibliotecas numéricas e de visualização~\cite{python3reference}. A biblioteca \texttt{NumPy} é empregada para representar populações e operar sobre vetores e matrizes de forma vetorizada~\cite{harris2020array}, enquanto o gerador \texttt{numpy.random} é utilizado nas operações estocásticas de inicialização, seleção e aplicação de operadores~\cite{python3random,harris2020array}. A medição de tempo é feita com o módulo \texttt{time}~\cite{python3time}, e a síntese gráfica dos resultados é conduzida com \texttt{matplotlib}~\cite{hunter2007matplotlib}.
+A implementação experimental foi desenvolvida em \texttt{Python}, amplamente adotado em computação científica pela clareza sintática e pelo ecossistema rico em bibliotecas numéricas~\cite{python3reference}.  
 
-Esse conjunto de ferramentas oferece suporte suficiente para implementar o AG base, alternar entre diferentes estratégias de controle populacional e registrar métricas de desempenho de forma reprodutível, evitando que questões de infraestrutura ofusquem o foco principal do estudo.
+A biblioteca \texttt{NumPy} foi utilizada para operações vetorizadas e representação da população~\cite{harris2020array}. A geração de números aleatórios baseou-se em \texttt{numpy.random}~\cite{python3random}, e a visualização dos resultados foi realizada com \texttt{matplotlib}~\cite{hunter2007matplotlib}.  
 
+Esse conjunto permite foco total na experimentação e análise do controle populacional, evitando que detalhes de infraestrutura influenciem nos resultados.
+
+\subsection{Técnicas de Controle Populacional Abordadas Neste Trabalho}
+\label{sec:controlepopulacional}
+
+Este artigo compara quatro estratégias de controle populacional aplicadas sobre o mesmo AG base, mantendo fixos representação, função de aptidão, método de seleção, cruzamento e mutação. Dessa forma, torna-se possível isolar o efeito da política de substituição sobre a dinâmica evolutiva, em particular sobre diversidade, convergência e risco de aprisionamento em ótimos locais~\cite{holland1975adaptation,goldberg1989genetic,eiben2015introduction,whitley1994tutorial}. As estratégias avaliadas diferem principalmente em dois aspectos: (i) a fração da população que é renovada em cada geração e (ii) o critério utilizado para decidir quais indivíduos permanecem ou são removidos~\cite{lacerda1999introducao,mitchell1998introduction}.
+
+\subsubsection{Substituição Total}
+
+Na substituição total, a cada geração todos os indivíduos da população corrente são substituídos pelos descendentes recém-gerados. Em termos operacionais, o algoritmo:
+
+\begin{enumerate}
+    \item seleciona pares de pais na população atual;
+    \item aplica cruzamento e mutação para produzir uma nova população de tamanho $N$;
+    \item descarta integralmente a população anterior.
+\end{enumerate}
+
+Trata-se do esquema mais simples e amplamente utilizado em AGs, pois facilita a implementação e o controle de parâmetros~\cite{goldberg1989genetic,whitley1994tutorial}. No entanto, por descartar toda a geração anterior, tende a reduzir a diversidade rapidamente, tornando o algoritmo mais suscetível à convergência prematura, especialmente quando a pressão seletiva é alta ou a mutação é conservadora~\cite{dejong1975analysis,spears1993crossover}. Nesta pesquisa, a substituição total é utilizada como referência de comparação para as demais estratégias.
+
+\subsubsection{Substituição Parcial}
+
+Na substituição parcial, apenas uma fração da população é renovada a cada geração, caracterizando um modelo do tipo \textit{steady-state}~\cite{eiben2015introduction,whitley1994tutorial}. De forma geral, o processo segue os passos:
+
+\begin{enumerate}
+    \item a partir da população atual, selecionam-se pais e produzem-se alguns descendentes;
+    \item esses descendentes são inseridos na população;
+    \item um subconjunto de indivíduos aleatórios é removido, preservando o tamanho populacional.
+\end{enumerate}
+
+A fração de indivíduos substituída em cada geração controla o ritmo de renovação: valores menores favorecem uma evolução mais gradual, enquanto valores maiores aproximam o comportamento do modelo geracional~\cite{goldberg1989genetic,mitchell1998introduction}. Esse esquema costuma produzir convergência mais suave e pode manter diversidade por mais tempo, já que parte da população é herdada diretamente de gerações anteriores. No contexto deste trabalho, a substituição parcial permite investigar o efeito de uma renovação menos agressiva sobre a taxa de sucesso e o esforço computacional do AG.
+
+\subsubsection{Elitismo}
+
+O elitismo introduz um mecanismo explícito de preservação dos melhores indivíduos \cite{goldberg1989genetic,whitley1994tutorial}. Em cada geração:
+
+\begin{enumerate}
+    \item uma pequena fração dos indivíduos com maior aptidão é copiada diretamente para a próxima geração;
+    \item o restante da população é preenchido com descendentes produzidos pelos operadores de cruzamento e mutação;
+    \item indivíduos menos aptos são descartados para manter o tamanho populacional.
+\end{enumerate}
+
+Esse mecanismo garante que as melhores soluções encontradas não sejam perdidas por efeito do acaso, o que tende a acelerar a convergência \cite{dejong1975analysis,goldberg1989genetic}. Por outro lado, a preservação sistemática de indivíduos muito aptos pode reduzir a diversidade e acentuar o risco de estagnação em ótimos locais, sobretudo quando a população é pequena \cite{eiben2015introduction,lacerda1999introducao}. Nos experimentos deste trabalho, o elitismo é combinado com um esquema de substituição tradicional, permitindo avaliar o quanto a preservação explícita dos melhores indivíduos altera o comportamento do AG frente às demais políticas.
+
+\subsubsection{Controle Populacional por Idade (GAVaPS / Michalewicz)}
+
+A estratégia de controle por idade é inspirada no modelo \textit{Genetic Algorithms with Varying Population Size} (GAVaPS)~\cite{michalewicz1993genetic}. Cada indivíduo passa a carregar, além do cromossomo e da aptidão, duas informações adicionais:
+
+\begin{itemize}
+    \item sua idade corrente (número de gerações que já sobreviveu);
+    \item um tempo de vida máximo (\textit{lifetime}), definido no momento de seu nascimento.
+\end{itemize}
+
+A ideia central é que indivíduos mais aptos recebem um \textit{lifetime} maior, podendo permanecer mais tempo na população, enquanto indivíduos menos aptos tendem a ser descartados mais rapidamente~\cite{michalewicz1993genetic}. Uma forma de calcular o \textit{lifetime} em função da aptidão relativa é:
+
+\[
+\text{lifetime}(i) = L_{\min} +
+\left\lfloor (L_{\max} - L_{\min}) \cdot
+\frac{f_{\max} - f(i)}{f_{\max} - f_{\min}} \right\rfloor,
+\]
+
+em que $f(i)$ é a aptidão do indivíduo $i$, $f_{\min}$ e $f_{\max}$ são, respectivamente, as aptidões mínima e máxima observadas na geração, e $L_{\min}$ e $L_{\max}$ definem os limites inferior e superior de tempo de vida. Assim, quanto melhor a aptidão (mais próxima de $f_{\max}$), maior tende a ser o \textit{lifetime} atribuído ao indivíduo.
+
+Em cada geração, o processo segue, de forma simplificada, as etapas \cite{michalewicz1993genetic,eiben2015introduction}:
+
+\begin{enumerate}
+    \item incrementar a idade de todos os indivíduos;
+    \item remover da população aqueles cuja idade ultrapassou seu \textit{lifetime};
+    \item gerar novos descendentes (via seleção, cruzamento e mutação) para repor os indivíduos removidos, restaurando o tamanho populacional desejado.
+\end{enumerate}
+
+Diferentemente das políticas clássicas, em que a remoção é determinada principalmente pela aptidão instantânea, aqui a exclusão ocorre por envelhecimento: mesmo indivíduos muito aptos eventualmente deixam a população ao atingir seu limite de vida. Esse mecanismo introduz uma \textit{diversidade temporal}, evitando que poucas soluções dominem a população indefinidamente e favorecendo um equilíbrio entre intensificação (preservar bons indivíduos por mais tempo) e exploração (renovar continuamente a população)~\cite{michalewicz1993genetic}. 
+
+No contexto deste estudo, o controle por idade é comparado diretamente com os esquemas de substituição total, substituição parcial e elitismo, permitindo avaliar empiricamente em que medida a introdução do \textit{lifetime} altera a taxa de sucesso, o tempo de convergência e o esforço computacional do AG no problema das \textit{n}-rainhas~\cite{richter2012algoritmo,sarkar2017adaptive,ali2023performance}.
 
 \subsection{Trabalhos Relacionados}
 
@@ -43,19 +162,23 @@ Diversos trabalhos utilizam o problema das \textit{n}-rainhas como \textit{bench
 
 \subsubsection{Representações Binária e Inteira para o Problema das \textit{n}-Rainhas \cite{richter2012algoritmo}}
 
+
 Richter et al.~\cite{richter2012algoritmo} comparam duas representações genéticas para o problema das \textit{n}-rainhas: uma codificação binária e uma codificação inteira do tipo \textit{InOrder}. A primeira exige conversão de bits para posições de rainhas e é suscetível a colisões em linhas; a segunda mapeia diretamente cada coluna a uma linha distinta, evitando conflitos de linha e coluna por construção.
 
 Os resultados mostram que a representação \textit{InOrder} reduz o número de soluções inviáveis e acelera a convergência, sobretudo para tabuleiros maiores. Embora os autores mantenham o controle populacional em um esquema tradicional, seu trabalho reforça a importância de fixar uma representação adequada antes de comparar outras variações de um AG. Neste estudo, adotamos uma representação por permutação semelhante à \textit{InOrder} justamente para minimizar o impacto de soluções inviáveis e isolar o efeito das estratégias de substituição populacional.
 
 \subsubsection{Comparação entre Algoritmo Genético e Buscas Clássicas (BFS/DFS) \cite{ali2023performance}}
 
+
 Ali et al.~\cite{ali2023performance} comparam um AG com buscas clássicas (BFS/DFS) no problema das \textit{n}-rainhas, analisando a escalabilidade de cada método. Utilizando uma representação vetorial em que cada posição do cromossomo indica a linha ocupada por uma rainha, os autores observam que, para instâncias pequenas, BFS e DFS são mais eficientes em tempo de execução, mas o AG passa a ser mais competitivo à medida que o tamanho do tabuleiro aumenta.
 
 Embora o foco do estudo seja a comparação entre paradigmas (busca exaustiva vs. AG), os resultados reforçam o papel dos AGs como alternativa viável para instâncias maiores e justificam seu uso como meta-heurística de referência neste trabalho. Diferentemente de Ali et al., aqui não comparamos AGs com métodos clássicos de busca, mas exploramos, dentro do próprio paradigma evolutivo, como diferentes políticas de controle populacional afetam desempenho em um problema combinatório já consolidado na literatura.
 
+
 \subsubsection{Algoritmo Genético Adaptativo com Controle de Diversidade \cite{sarkar2017adaptive}}
 
 Sarkar e Nag~\cite{sarkar2017adaptive} propõem um AG adaptativo para o problema das \textit{n}-rainhas, enfatizando mecanismos explícitos de controle da diversidade populacional. Os autores utilizam uma representação por permutação, um cruzamento do tipo \textit{Order 1 Crossover} e operadores de mutação com probabilidades relativamente altas, além de estruturas auxiliares (como um repositório de indivíduos menos aptos) para evitar estagnação em ótimos locais.
+
 
 Os resultados indicam que o esquema adaptativo encontra soluções ótimas para valores elevados de $N$ (até 100), sugerindo que a forma como a população é renovada tem influência direta na qualidade e na velocidade da convergência. O trabalho, porém, combina várias alterações simultâneas (função de aptidão, mutação, repositório, etc.), o que dificulta isolar o efeito de cada componente. Em contraste, o presente estudo mantém constantes representação e operadores genéticos e varia apenas a política de controle populacional, buscando medir de forma mais direta o impacto da substituição e do envelhecimento sobre o desempenho do AG.
 
@@ -64,48 +187,3 @@ Os resultados indicam que o esquema adaptativo encontra soluções ótimas para 
 Farhan et al.~\cite{farhan2015solving} utilizam um AG para encontrar as 92 soluções válidas do problema das 8-rainhas, empregando uma representação vetorial que elimina conflitos em linhas e colunas e concentra a avaliação em ataques diagonais. A função de aptidão é definida em termos do número de conflitos diagonais, e o AG é executado até que todas as soluções distintas sejam encontradas.
 
 Embora o objetivo seja diferente do deste trabalho (cobertura do espaço de soluções em vez de análise comparativa de políticas de controle), o estudo ilustra a capacidade dos AGs de explorar um espaço combinatório rico e de encontrar múltiplas soluções válidas. Aqui, aproveitamos essa mesma característica do problema, mas direcionamos a atenção para como diferentes estratégias de substituição e um esquema de controle por idade alteram a taxa de sucesso e o esforço necessário para encontrar ao menos uma solução válida em instâncias progressivamente mais difíceis.
-
-
-\subsection{Controle Populacional Baseado em Idade}
-
-Entre as estratégias possíveis de controle populacional, abordagens que incorporam algum tipo de envelhecimento ou tempo de vida vêm sendo exploradas como forma de equilibrar exploração e intensificação, evitando que indivíduos muito antigos dominem a população indefinidamente. O controle por idade adotado neste trabalho segue essa perspectiva, mas em uma forma simples e acoplada diretamente à aptidão atual dos indivíduos.
-
-Cada indivíduo possui uma idade e um \textit{lifetime} (tempo máximo de vida). A cada geração, a idade é incrementada em uma unidade; quando a idade ultrapassa o lifetime, o indivíduo é removido. O tamanho da população é mantido fixo: após a remoção dos indivíduos cujo tempo de vida se esgotou, novos descendentes são gerados para preencher as vagas.
-
-\subsubsection{Cálculo do Lifetime}
-
-O tempo de vida máximo é recalculado a cada geração com base na distribuição de aptidões daquela população. Seja $f_{\min}$ a melhor aptidão da geração, $f_{\max}$ a pior e $f(i)$ a aptidão do indivíduo $i$. O lifetime é dado por:
-
-\[
-\text{lifetime}(i) = L_{\min} + 
-\left\lfloor (L_{\max} - L_{\min}) \cdot 
-\frac{f_{\max} - f(i)}{f_{\max} - f_{\min}} \right\rfloor,
-\]
-
-de modo que indivíduos mais aptos tendem a viver por mais gerações que indivíduos menos aptos. Os valores utilizados neste trabalho são
-\[
-L_{\min} = 1, \qquad L_{\max} = 5,
-\]
-escolhidos empiricamente para induzir renovação contínua sem tornar a população excessivamente instável.
-
-\subsubsection{Reprodução e Manutenção do Tamanho Populacional}
-
-Após a remoção dos indivíduos cujo tempo de vida se esgotou, seja $S$ o número de sobreviventes. O número de descendentes a serem criados é definido por
-
-\[
-N_{\text{novos}} = 
-\left\lceil \text{taxa}_{\text{reprodução}} \cdot S \right\rceil,
-\]
-
-com
-\[
-\text{taxa}_{\text{reprodução}} = 0{,}5.
-\]
-
-Os novos indivíduos são gerados a partir dos operadores padrão do AG (seleção em torneio binário, cruzamento OX e mutação por troca), iniciam com idade zero e têm seus lifetimes calculados após a avaliação. Se a combinação de sobreviventes e descendentes ainda não atingir o tamanho populacional nominal, indivíduos adicionais são reinicializados aleatoriamente.
-
-\subsubsection{Resumo e Relação com Este Estudo}
-
-O mecanismo de idade adotado pode ser resumido em três passos: (i) incrementar a idade de todos os indivíduos; (ii) remover aqueles cuja idade exceda o lifetime; (iii) gerar novos descendentes até restaurar o tamanho populacional. Ao vincular o lifetime à aptidão relativa de cada geração, o algoritmo promove uma renovação constante, preservando bons indivíduos por mais tempo, mas evitando que qualquer cromossomo permaneça indefinidamente na população.
-
-Essa estratégia fornece um contraste direto com os esquemas de substituição total, substituição parcial e elitismo investigados neste trabalho, permitindo comparar, sob as mesmas condições experimentais, um controle populacional baseado em idade com políticas clássicas que não incorporam envelhecimento explícito. A metodologia detalhada na Seção~\ref{sec:metodologia} parte dessa fundamentação para definir os cenários de comparação empírica entre as quatro estratégias.

@@ -1,42 +1,72 @@
 \documentclass[12pt]{article}
 
+% -------------------------------
+% Pacotes essenciais
+% -------------------------------
 \usepackage{sbc-template}
-\usepackage{graphicx,url}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[brazil]{babel}
 \usepackage{amsmath}
+
+% -------------------------------
+% Pacotes adicionais utilizados no TCC
+% -------------------------------
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc}
+
 \usepackage{chessboard}
 \usepackage{multirow}
 \usepackage{booktabs}
 \usepackage{float}
 
-\sloppy
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
-\title{Análise Comparativa de Estratégias de Controle Populacional em Algoritmos Genéticos aplicados ao Problema das N-Rainhas}
+\usepackage{needspace}
+
+% -------------------------------
+% Outras configurações
+% -------------------------------
+\sloppy  % Evita overfull boxes
+
+% -------------------------------
+% Informações do Trabalho
+% -------------------------------
+\title{Análise Comparativa de Estratégias de Controle Populacional em Algoritmos Genéticos Aplicados ao Problema das N-Rainhas}
 
 \author{Vinícius Rubin\inst{1}, Igor Yepes\inst{1}}
 
-\address{Instituto de Educação, Ciência e Tecnologia Farroupilha - \\
+\address{Instituto Federal de Educação, Ciência e Tecnologia Farroupilha --\\
 Campus Frederico Westphalen (IFFAR-FW)}
 
 \begin{document}
 
 \maketitle
 
+% -------------------------------
+% Abstract em inglês
+% -------------------------------
 \begin{abstract}
-  This article investigates how different population control strategies affect the performance of genetic algorithms when solving the $n$-queens problem.
-  We describe the design of a baseline implementation, outline the experimental protocol, and discuss how metrics such as execution time, number of generations, and success rate will be interpreted.
-  The study aims to identify configurations that preserve diversity while accelerating convergence, contributing guidelines for practitioners who deploy evolutionary heuristics in combinatorial search tasks.
+This article investigates how different population control strategies affect the performance of genetic algorithms applied to the $n$-queens problem. The study presents the design of a baseline implementation, details the experimental protocol, and discusses the interpretation of metrics such as execution time, number of generations, and success rate. The objective is to identify configurations capable of preserving population diversity while accelerating convergence, offering practical guidelines for applying evolutionary heuristics to combinatorial search problems.
+
+\textbf{Keywords:} Genetic Algorithms, Population Control, Evolutionary Computation, N-Queens Problem.
 \end{abstract}
 
+% -------------------------------
+% Resumo em português
+% -------------------------------
 \begin{resumo}
-  Este artigo investiga como diferentes estratégias de controle populacional influenciam o desempenho de algoritmos genéticos na resolução do problema das $n$-rainhas.
-  São descritos o planejamento da implementação base, o protocolo experimental e a forma de análise de métricas como tempo de execução, número de gerações e taxa de sucesso.
-  O estudo busca apontar configurações que preservem a diversidade e acelerem a convergência, oferecendo subsídios para o emprego de heurísticas evolutivas em tarefas de busca combinatória.
+Este artigo investiga como diferentes estratégias de controle populacional influenciam o desempenho de algoritmos genéticos aplicados ao problema das $n$-rainhas. São apresentados o planejamento da implementação base, o protocolo experimental e a análise de métricas como tempo de execução, número de gerações e taxa de sucesso. O objetivo é identificar configurações capazes de preservar a diversidade populacional e, ao mesmo tempo, acelerar a convergência, fornecendo orientações práticas para o uso de heurísticas evolutivas em tarefas de busca combinatória.
+
+\textbf{Palavras-chave:} Algoritmos Genéticos, Controle Populacional, Computação Evolutiva, Problema das N-Rainhas.
 \end{resumo}
 
+% -------------------------------
+% Seções principais do TCC
+% -------------------------------
 \input{sections/introducao}
 \input{sections/fundamentacao}
 \input{sections/metodologia}
@@ -44,6 +74,9 @@ Campus Frederico Westphalen (IFFAR-FW)}
 \input{sections/resultados}
 \input{sections/conclusoes}
 
+% -------------------------------
+% Bibliografia
+% -------------------------------
 \bibliographystyle{sbc}
 \bibliography{TCC-ViniciusRubin}
 
