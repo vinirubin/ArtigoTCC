@@ -1,28 +1,35 @@
 \section{Metodologia}
 \label{sec:metodologia}
 
-Este estudo compara o impacto de quatro estratégias de controle populacional em algoritmos genéticos (AGs) aplicados ao problema das \textit{n}-rainhas, seguindo diretrizes de experimentação reprodutível em computação evolutiva~\cite{eiben2015introduction}. Em todas as configurações, representação, função de aptidão e operadores genéticos permanecem fixos, permitindo isolar o efeito da política de substituição.
+Esta seção descreve o desenho experimental empregado para comparar quatro estratégias de controle populacional em Algoritmos Genéticos (AGs) aplicados ao problema das \textit{n}-rainhas. O estudo segue diretrizes de experimentação reprodutível em computação evolutiva \cite{eiben2015introduction}, mantendo constantes todos os componentes do algoritmo que não estão diretamente relacionados ao mecanismo de substituição populacional. Dessa forma, o impacto de cada estratégia pode ser analisado isoladamente, sem interferências provenientes de diferenças estruturais no operador evolutivo.
 
 \subsection{Algoritmo Genético Base}
 
-Cada indivíduo é representado por uma permutação de tamanho $n$, eliminando conflitos em linhas e colunas. A aptidão corresponde ao número de pares de rainhas em conflito diagonal, método de avaliação comum na literatura e com complexidade $O(n^2)$.
+A representação utilizada é uma permutação de tamanho $n$, onde a posição $i$ do vetor indica a linha ocupada pela rainha na coluna $i$, garantindo a ausência de conflitos em linhas e colunas. Assim, a função de aptidão consiste exclusivamente no número de pares de rainhas em conflito diagonal, métrica de uso amplamente consolidado na literatura e de complexidade $O(n^2)$.
 
-A população inicial é gerada embaralhando sequências de $0$ a $n - 1$. A evolução utiliza seleção por torneio binário, cruzamento \textit{Order Crossover} (OX) e mutação por troca de duas posições. A taxa de mutação é mantida fixa em \textbf{10\%} em todas as estratégias, reduzindo a dimensionalidade do espaço experimental e possibilitando concentrar a análise exclusivamente nos mecanismos de controle populacional.
+A população inicial é gerada embaralhando sequências de $0$ a $n-1$. O algoritmo utiliza:
+\begin{itemize}
+    \item \textbf{Seleção}: torneio binário;
+    \item \textbf{Cruzamento}: \textit{Order Crossover} (OX), aplicado em lote;
+    \item \textbf{Mutação}: troca de duas posições (\textit{swap});
+    \item \textbf{Taxa de mutação}: fixa em 10\% para todas as configurações.
+\end{itemize}
+
+A taxa de mutação fixa elimina interações entre parâmetros que poderiam mascarar o efeito das estratégias de controle populacional, permitindo uma comparação mais justa.
 
 \subsection{Estratégias de Controle Populacional}
 
-Quatro mecanismos são comparados:
+Quatro estratégias foram avaliadas:
 
 \begin{itemize}
-    \item \textbf{Substituição total}: toda a população é renovada a cada geração.  
-    \item \textbf{Substituição parcial}: uma fração dos indivíduos é preservada e o restante substituído.  
-    \item \textbf{Elitismo}: uma porcentagem dos melhores indivíduos é garantida na nova geração.  
-    \item \textbf{Controle por idade}: indivíduos possuem tempo de vida limitado, calculado a partir da aptidão, sendo removidos quando ultrapassam seu \textit{lifetime}, e a população pode crescer ou encolher dinamicamente ao longo das gerações.  
+    \item \textbf{Substituição total}: todos os indivíduos são substituídos a cada geração.
+    \item \textbf{Substituição parcial}: uma fração fixa da população é substituída por novos descendentes.
+    \item \textbf{Elitismo}: um subconjunto dos melhores indivíduos é preservado integralmente.
+    \item \textbf{Controle por idade (GAVaPS)}: cada indivíduo recebe um \textit{lifetime} proporcional à sua aptidão e é removido quando o ultrapassa, produzindo uma população de tamanho dinâmico.
 \end{itemize}
 
-O tamanho populacional avaliado (100) representa uma escala típica na prática de AGs — pequena — permitindo observar como a quantidade de indivíduos interage com cada política de substituição nas estratégias de população fixa. No caso do controle por idade, esses valores são utilizados como tamanho inicial da população, que passa a variar dinamicamente durante a execução.
-
-A Tabela~\ref{tab:estrategias} resume os parâmetros específicos de cada mecanismo.
+Nas estratégias de população fixa, utiliza-se uma população de 100 indivíduos.  
+Para o controle por idade, o mesmo valor é utilizado como população inicial, permitindo variação ao longo da execução.
 
 \begin{table}[h!]
 \centering
@@ -43,62 +50,65 @@ Elitismo            & Fração de elite      & 10\% \\
 \midrule
 Controle por idade  & Lifetime             & $L_{\min}=1$, $L_{\max}=5$ \\
                     & Taxa de reprodução   & 0{,}5 \\
-                    & Tamanho inicial da população & 100 \\
+                    & População inicial    & 100 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Controle por Idade no Contexto Experimental}
 
-O mecanismo utilizado neste trabalho segue o modelo descrito na Seção~\ref{sec:fundamentacao}. Após a avaliação da população, o \textit{lifetime} de cada indivíduo é recalculado por uma função bi-linear em função do intervalo de aptidões; a idade é incrementada em uma unidade; e indivíduos cuja idade ultrapassa o seu \textit{lifetime} são removidos.
+O controle por idade utilizado segue o modelo descrito na Seção~\ref{sec:fundamentacao}. A cada iteração:
 
-Seja $S$ o número de sobreviventes após essa etapa. A partir deles, são gerados novos indivíduos por cruzamento, de acordo com uma taxa de reprodução fixa $\tau = 0{,}5$:
+\begin{enumerate}
+    \item as idades dos indivíduos são incrementadas;
+    \item indivíduos cuja idade excede seu \textit{lifetime} são eliminados;
+    \item seja $S$ o número de sobreviventes, gera-se
+    \[
+        N_{\text{novos}} = \left\lfloor \tau \cdot S \right\rceil,
+    \]
+    com $\tau = 0{,}5$, produzindo descendentes por seleção, cruzamento e mutação.
+\end{enumerate}
 
+Assim, o tamanho da população torna-se dinâmico:
 \[
-N_{\text{novos}} = \left\lfloor \tau \cdot S \right\rceil,
+    \text{Pop}(t+1) = S + N_{\text{novos}}.
 \]
 
-onde $\lfloor \cdot \rceil$ denota arredondamento para o inteiro mais próximo. A nova população passa a ter tamanho
+Caso $S=0$, ocorre reinicialização completa da população.
 
-\[
-\text{Pop}(t+1) = S + N_{\text{novos}},
-\]
+\subsection{Desenho Experimental}
 
-permitindo que a população aumente ou diminua ao longo do tempo, de acordo com a dinâmica de sobrevivência e reprodução. Representação, seleção, cruzamento e mutação permanecem idênticos aos das demais estratégias.  
-
-Caso todos os indivíduos sejam eliminados em uma geração ($S = 0$), é aplicada uma reinicialização completa da população, gerando um novo conjunto de indivíduos aleatórios com o mesmo tamanho inicial, de modo a evitar estagnação irrecuperável.
-
-\subsection{Experimentos}
-
-Para cada combinação de:
-
-\begin{itemize}
-    \item estratégia de controle populacional,
-    \item tamanho da população inicial (100),
-\end{itemize}
-
-são realizadas \textbf{100 execuções independentes} para cada valor de $n$.  
-A taxa de mutação é mantida fixa em \textbf{10\%} em todas as condições experimentais, seguindo recomendações da literatura para representações permutacionais e reduzindo o volume total de cenários, o que permite concentrar a análise exclusivamente no impacto das estratégias de controle populacional.
+Para cada estratégia e cada valor de $n$, realizam-se \textbf{100 execuções independentes}, utilizando sementes distintas na inicialização dos geradores de números aleatórios. A repetição independente é fundamental para reduzir variância e permitir inferências confiáveis sobre o desempenho estocástico de cada abordagem.
 
 \subsubsection*{Critério de parada}
 
-Cada execução é encerrada quando:
+Uma mudança central deste trabalho é o uso de um critério de parada exclusivamente baseado no \textbf{número total de avaliações da função de aptidão}. Esse critério é amplamente adotado em experimentos científicos com algoritmos evolutivos por refletir diretamente o esforço computacional empregado na busca \cite{eiben2015introduction}.
+
+O limite máximo de avaliações é calculado a partir do tamanho da população inicial (denotado por $P$) e do tamanho do problema $n$, segundo:
+
+\[
+\text{limite\_avaliacoes} = 2 \cdot P \cdot n.
+\]
+
+Esse cálculo define um orçamento fixo e igualitário de esforço computacional para todas as estratégias, independentemente de diferenças no custo por geração ou da variação do tamanho populacional no controle por idade. A execução é encerrada somente quando:
 
 \begin{itemize}
     \item uma solução válida (aptidão zero) é encontrada; ou
-    \item o algoritmo atinge o limite de \textbf{100 gerações}; ou
-    \item o tempo de execução atinge um limite máximo pré-definido $T_{\max}$ = 1 s (limite de tempo por execução).
+    \item o limite de avaliações é atingido.
 \end{itemize}
 
-O valor de $T_{\max}$ é mantido constante para todas as estratégias e configurações de tamanho de população, funcionando como uma barreira computacional uniforme. Esse controle adicional é particularmente relevante para o mecanismo de controle por idade, cujo custo computacional por geração é maior devido à gestão dinâmica de idade, \textit{lifetime} e tamanho populacional. Assim, evita-se que execuções muito lentas distorçam as métricas de tempo e esforço evolutivo.
+O número de gerações executadas passa a ser uma \textbf{métrica observada}, e não um critério de parada.
 
 \subsubsection*{Métricas coletadas}
 
 Para cada execução, registram-se:
 
 \begin{itemize}
-    \item \textbf{Tempo de execução total};
-    \item \textbf{Número de gerações até a solução ou até o limite};
-    \item \textbf{Indicador de sucesso} (solução encontrada antes de atingir qualquer limite);
-    \item \textbf{Critério de parada acionado} (solução, limite de gerações ou limite de tempo).
+    \item \textbf{Indicador de sucesso}: se a solução foi encontrada antes do limite;
+    \item \textbf{Total de avaliações realizadas};
+    \item \textbf{Número de gerações efetivamente executadas};
+    \item \textbf{Tempo total de execução};
+    \item \textbf{Diversidade populacional média} e \textbf{entropia média}, quando aplicável.
 \end{itemize}
+
+Essas métricas permitem avaliar simultaneamente a eficácia (taxa de sucesso), a eficiência (avaliações até a solução) e o comportamento evolutivo (dinâmica populacional e diversidade) das diferentes estratégias de controle populacional.

@@ -1,73 +1,115 @@
 \section{Desenvolvimento}
 \label{sec:desenvolvimento}
 
-Esta seção descreve como o estudo foi concretamente implementado, desde a organização da ferramenta experimental até a execução dos experimentos e a preparação dos dados que embasam a análise apresentada na seção de Resultados e Discussão.
+Esta seção descreve a implementação prática do estudo, desde a organização modular da ferramenta experimental até a condução automatizada das execuções e o processamento dos resultados utilizados na análise apresentada na Seção~\ref{sec:resultados}.
 
 \subsection{Arquitetura da Ferramenta Experimental}
 
-A implementação foi estruturada como uma pequena \emph{ferramenta de experimentação} em \texttt{Python}, organizada em módulos com responsabilidades bem definidas. Essa separação favorece a reprodutibilidade do estudo e permite que novos cenários de teste sejam adicionados com o mínimo de alterações no código existente.
+A implementação foi construída como uma \emph{ferramenta de experimentação} em \texttt{Python}, estruturada em módulos independentes e de responsabilidade bem definida. Essa modularização facilita a reprodutibilidade, a substituição de componentes e a adição de novas estratégias ou cenários experimentais.
 
-De forma geral, a arquitetura é composta pelos seguintes blocos lógicos:
+A arquitetura geral organiza-se nos seguintes blocos:
 
 \begin{itemize}
     \item \textbf{Núcleo do algoritmo genético}:
-    responsável pelo laço evolutivo principal, inicialização da população, aplicação dos operadores genéticos e atualização da geração corrente.
+    implementa o laço evolutivo, mantém o estado da população, controla o contador de avaliações e aplica os operadores genéticos em cada iteração.
+    
     \item \textbf{Módulo de representação e aptidão}:
-    encapsula a codificação em forma de permutação para o problema das \textit{n}-rainhas e a função de avaliação baseada na contagem de pares de rainhas em conflito diagonal, conforme definido na Seção~\ref{sec:fundamentacao}.
+    implementa a codificação em permutação e a função de aptidão para o problema das \textit{n}-rainhas, incluindo uma versão altamente otimizada com \texttt{Numba} para acelerar a avaliação de conflitos diagonais.
+
     \item \textbf{Módulo de operadores genéticos}:
-    implementa seleção, cruzamento e mutação de forma independente do problema, recebendo apenas indivíduos e retornando descendentes.
+    reúne a lógica de seleção, cruzamento (\textit{OX}) e mutação (\textit{swap}), todos implementados de forma vetorizada para minimizar custos de memória e maximizar paralelismo.
+
     \item \textbf{Módulo de controle populacional}:
-    concentra a lógica das quatro estratégias de substituição comparadas neste trabalho (população fixa, substituição geracional, elitismo e controle por idade/variável).
+    implementa as quatro estratégias comparadas — substituição total, substituição parcial, elitismo e controle por idade — de forma isolada, garantindo que o restante do algoritmo permaneça invariável entre cenários.
+
     \item \textbf{Módulo de experimentos}:
-    responsável por ler as configurações de cada cenário (tamanho do tabuleiro, limites de gerações e tempo, número de execuções independentes, entre outros), orquestrar a execução repetida do algoritmo genético e registrar as métricas de interesse em arquivos de saída.
+    responsável por orquestrar execuções repetidas, aplicar o critério de parada baseado no número de avaliações, registrar métricas e armazenar os resultados em formato \texttt{.csv} e \texttt{.json}.
+
     \item \textbf{Módulo de registro e persistência}:
-    implementa a escrita de logs e a serialização dos resultados em formato tabular (\texttt{.csv}), de modo a facilitar o pós-processamento estatístico.
+    implementa rotinas de logging e serialização, garantindo rastreabilidade completa das execuções (semente utilizada, parâmetros, duração, avaliações realizadas).
 \end{itemize}
 
-Essa organização modular permite que o mesmo núcleo de algoritmo genético seja utilizado com diferentes políticas de controle populacional, modificando-se apenas a configuração carregada pelo módulo de experimentos. Além disso, a presença de um módulo dedicado a registro de resultados simplifica a automatização de baterias extensas de testes, uma vez que a ferramenta pode ser executada em modo não interativo a partir de linha de comando.
+Essa separação possibilita que o mesmo núcleo do AG seja testado com diferentes políticas de substituição, alterando-se apenas o módulo de controle populacional. Como consequência, qualquer diferença observada nos resultados é atribuível à estratégia de controle — e não ao restante do algoritmo.
 
 \subsection{Implementação dos Operadores Genéticos}
 
-A implementação segue as decisões de projeto descritas na Seção~\ref{sec:metodologia}. Cada indivíduo é representado por um vetor de inteiros de tamanho $n$, onde a posição do vetor corresponde à coluna do tabuleiro e o valor armazenado indica a linha ocupada pela rainha naquela coluna. Como essa representação garante que não haja conflitos em linhas e colunas, a função de aptidão concentra-se em contabilizar apenas conflitos diagonais.
+Os operadores genéticos seguem rigorosamente as definições apresentadas na Seção~\ref{sec:metodologia}. Cada indivíduo é um vetor permutacional de tamanho $n$, no qual o valor na coluna $i$ indica a linha ocupada pela rainha.
 
-A função de aptidão percorre pares de colunas e verifica se a diferença de índices é igual à diferença absoluta entre as linhas correspondentes. Quando essa condição se verifica, o par de rainhas está em conflito diagonal e uma penalização é aplicada. Para fins de comparação entre estratégias de controle populacional, o valor de aptidão é calculado de forma consistente em todos os cenários, e uma solução ótima é caracterizada pela ausência de conflitos diagonais.
+A função de aptidão avalia exclusivamente conflitos diagonais. Sua implementação inclui:
+\begin{itemize}
+    \item versões sequencial e paralela otimizadas com \texttt{Numba};
+    \item buffers pré-alocados para evitar realocação de memória;
+    \item vetorização completa das operações de contagem.
+\end{itemize}
 
-A seleção é realizada por torneio binário: dois indivíduos são escolhidos aleatoriamente da população e o de melhor aptidão é selecionado como pai. Esse procedimento é repetido até que seja formada a quantidade necessária de pais para gerar a prole da próxima geração. Esse método é simples, eficiente e não requer normalização explícita dos valores de aptidão.
+A seleção é realizada por torneio binário vetorizado. O cruzamento \textit{OX} é aplicado em lote, reduzindo o overhead de chamadas repetidas. A mutação por troca também é vetorizada e utiliza um kernel compilado pelo \texttt{Numba} para troca in-place de múltiplos indivíduos em paralelo.
 
-O cruzamento adotado é o \textit{Order Crossover} (OX), adequado a representações permutacionais. Na implementação, dois pontos de corte são sorteados aleatoriamente ao longo do vetor. O segmento interno entre os cortes é copiado diretamente de um dos pais para o descendente, preservando a ordem relativa dos elementos. Em seguida, as posições restantes são preenchidas com os genes do outro pai, respeitando a ordem em que aparecem e evitando duplicações. O resultado é um descendente que herda blocos estruturais de ambos os pais, mantendo a propriedade de permutação válida.
+Essas otimizações garantem que o esforço computacional entre as estratégias seja comparável, minimizando vieses relacionados ao custo interno dos operadores.
 
-A mutação é implementada na forma de troca de posições (\emph{swap mutation}). Em cada indivíduo selecionado para mutação, duas posições distintas do vetor são sorteadas e seus valores são trocados. Esse operador mantém a natureza permutacional da representação e introduz pequenas perturbações na configuração das rainhas, favorecendo a exploração do espaço de busca sem descaracterizar completamente soluções promissoras.
+\subsection{Implementação das Estratégias de Controle Populacional}
 
-Cada uma das quatro estratégias de controle populacional atua sobre os mesmos operadores descritos acima, de modo que diferenças de desempenho observadas nos experimentos possam ser atribuídas predominantemente à política de substituição e aos mecanismos associados (como idade máxima, renovação parcial da população ou variação do tamanho populacional).
+As quatro estratégias avaliadas compartilham operadores e função de aptidão, diferindo apenas na forma como atualizam a população:
+
+\begin{itemize}
+    \item \textbf{Substituição total}: toda a população é substituída a cada geração.
+    
+    \item \textbf{Substituição parcial}: uma fração fixa da população é substituída; os indivíduos preservados são selecionados \emph{aleatoriamente}, conforme regra estabelecida neste trabalho.
+
+    \item \textbf{Elitismo}: preserva-se uma fração fixa, composta exclusivamente pelos melhores indivíduos.
+    
+    \item \textbf{Controle por idade (GAVaPS)}: cada indivíduo recebe um \textit{lifetime} calculado via função bilinear dependente da aptidão; indivíduos cuja idade ultrapassa o limite são removidos; o tamanho da população varia dinamicamente a cada iteração.
+\end{itemize}
+
+No controle por idade, a população inicial é de $100$ indivíduos, porém o tamanho pode encolher ou crescer a cada iteração, seguindo:
+\[
+\text{Pop}(t+1) = S + \left\lfloor 0{,}5\,S \right\rceil.
+\]
+
+Esse comportamento é implementado sem comprometer a comparabilidade entre estratégias, pois o critério de parada depende apenas do número de avaliações da aptidão, não do número de gerações.
 
 \subsection{Execução dos Experimentos}
 
-A ferramenta experimental foi configurada para executar automaticamente todas as combinações de parâmetros definidos na Seção~\ref{sec:metodologia}. Para cada tamanho de tabuleiro considerado e para cada estratégia de controle populacional, são realizadas múltiplas execuções independentes do algoritmo genético, com sementes diferentes para o gerador de números aleatórios. Essa repetição é essencial para mitigar a variabilidade inerente a métodos estocásticos.
-
-Cada execução segue o fluxo descrito a seguir:
+A execução de cada cenário segue cinco etapas principais:
 
 \begin{enumerate}
-    \item \textbf{Inicialização}: a partir da configuração fornecida, a população inicial é gerada por embaralhamento aleatório de sequências de $0$ a $n-1$. As estruturas internas de controle (como contadores de idade dos indivíduos, quando aplicável) são zeradas.
-    \item \textbf{Laço evolutivo}: em cada geração, a função de aptidão é avaliada para todos os indivíduos (ou para aqueles afetados por modificações, dependendo da estratégia). Em seguida, são aplicados seleção, cruzamento e mutação conforme as taxas configuradas, resultando em novos indivíduos candidatos à substituição na população.
-    \item \textbf{Aplicação da estratégia de controle populacional}: de acordo com o esquema em avaliação, a população é atualizada. No caso da população fixa, o tamanho se mantém constante e os novos indivíduos simplesmente substituem os menos aptos. Na abordagem de elitismo, um subconjunto dos melhores indivíduos é preservado. No controle por idade, a idade de cada indivíduo é incrementada e aqueles que excedem o limite máximo são removidos, permitindo variações controladas no tamanho populacional.
-    \item \textbf{Verificação dos critérios de parada}: após cada geração, verifica-se se algum dos critérios de parada foi satisfeito: (i) solução ótima encontrada; (ii) limite máximo de gerações atingido; ou (iii) limite de tempo excedido. Em qualquer desses casos, a execução é encerrada.
-    \item \textbf{Registro das métricas}: ao final de cada execução, são registrados o tempo total decorrido, o número de gerações percorridas, o critério de parada acionado e um indicador de sucesso, além de informações de configuração (estratégia de controle adotada, tamanho do tabuleiro, semente aleatória, entre outras).
+    \item \textbf{Inicialização}: a população é gerada aleatoriamente e os contadores internos (idade, lifetime e avaliações) são zerados.
+
+    \item \textbf{Laço evolutivo}: seleção, cruzamento, mutação e avaliação dos novos indivíduos são aplicados repetidamente.
+
+    \item \textbf{Aplicação da política de controle populacional}: a população é atualizada de acordo com a estratégia em estudo.
+
+    \item \textbf{Critério de parada}: a execução é encerrada quando:
+    \[
+    \text{quant\_avaliacoes} \geq 20 \cdot P \cdot n,
+    \]
+    onde $P$ é o tamanho da população inicial (100 neste estudo).  
+    Se uma solução ótima (aptidão zero) surgir antes desse limite, a execução também é encerrada.
+
+    \item \textbf{Registro das métricas}: ao final, são salvos em arquivo o número total de avaliações, o tempo total, a quantidade de gerações executadas, a semente, e um indicador de sucesso.
 \end{enumerate}
 
-Para facilitar a automação, um script principal recebe como entrada um arquivo de configuração contendo a lista de cenários a serem executados. Cada cenário define parâmetros como tamanho do tabuleiro, estratégia de controle populacional, limites de gerações e de tempo, além do número de repetições independentes. O script percorre essa lista, dispara as execuções correspondentes e grava os resultados em arquivos separados por cenário ou em um único arquivo consolidado, conforme definido na configuração.
+A escolha de utilizar apenas avaliações como critério de parada garante orçamento computacional idêntico entre as estratégias, mesmo quando o número de indivíduos avaliados por geração é variável, como ocorre no controle por idade.
 
 \subsection{Organização dos Dados e Pré-processamento}
 
-Os dados produzidos pela ferramenta experimental são armazenados em arquivos no formato \texttt{.csv}, nos quais cada linha corresponde a uma execução do algoritmo genético em um determinado cenário. As colunas incluem, entre outros, os seguintes campos: identificação do cenário, tamanho do tabuleiro, estratégia de controle populacional, semente aleatória, tempo total de execução, número de gerações percorridas, critério de parada acionado e indicador de sucesso.
-
-Antes da etapa de análise estatística, é realizado um pré-processamento desses arquivos com os seguintes objetivos principais:
+Cada execução gera um registro individual no formato \texttt{.csv}, contendo:
 
 \begin{itemize}
-    \item \textbf{Validação e limpeza}: verificação de registros incompletos ou inconsistentes (por exemplo, execuções interrompidas por falhas externas) e remoção ou correção desses casos, quando necessário;
-    \item \textbf{Cálculo de métricas derivadas}: criação de colunas adicionais a partir das métricas brutas, como taxas de sucesso por cenário, tempo médio até a solução, número médio de gerações por execução bem-sucedida e proporção de cada critério de parada acionado;
-    \item \textbf{Agrupamento por estratégia e tamanho de problema}: reorganização dos dados em estruturas que facilitem a comparação entre estratégias de controle populacional, mantendo separadas as diferentes dificuldades (valores de $n$) e consolidando resultados de execuções independentes.
+    \item tamanho do problema $n$;
+    \item estratégia de controle populacional;
+    \item semente usada;
+    \item avaliações totais realizadas;
+    \item número de gerações executadas;
+    \item tempo total;
+    \item indicador de sucesso.
 \end{itemize}
 
-O pré-processamento é implementado em \texttt{Python}, utilizando bibliotecas de manipulação de dados para carregar os arquivos \texttt{.csv}, aplicar filtros e agregar estatísticas. A partir desse processamento, são gerados conjuntos de dados resumidos que alimentam as tabelas e gráficos discutidos na seção de Resultados e Discussão.
+Antes da análise estatística, realiza-se uma etapa de pré-processamento que inclui:
 
-Essa etapa intermediária reduz o acoplamento entre a implementação do algoritmo e a análise dos resultados, permitindo que novos experimentos sejam incorporados ao estudo apenas pela adição de arquivos de saída e pela reexecução dos scripts de processamento, sem alterações no núcleo do algoritmo genético.
+\begin{itemize}
+    \item \textbf{validação de registros}, removendo execuções incompletas;
+    \item \textbf{cálculo de métricas derivadas}, como taxa de sucesso, avaliações médias até a solução e desempenho relativo;
+    \item \textbf{agrupamento por estratégia e tamanho $n$}, com geração automática de tabelas e gráficos.
+\end{itemize}
+
+Esse fluxo garante independência total entre a implementação do AG e a análise dos dados, permitindo a replicação do estudo apenas pela adição de novos arquivos de saída e reexecução dos scripts de pré-processamento.

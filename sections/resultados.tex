@@ -1,62 +1,80 @@
 \section{Resultados e Discussão}
 \label{sec:resultados}
 
-Esta seção apresenta e discute os resultados obtidos a partir da execução sistemática dos experimentos descritos na Seção~\ref{sec:metodologia} e implementados conforme detalhado na Seção~\ref{sec:desenvolvimento}. Os dados aqui analisados refletem o comportamento das quatro estratégias de controle populacional avaliadas — \textbf{substituição geracional}, \textbf{elitismo}, \textbf{população fixa simples} e \textbf{controle por idade (GAVaPS)} — ao longo de múltiplas execuções independentes do algoritmo genético aplicado ao problema das \textit{n}-rainhas.
+Esta seção apresenta e discute os resultados obtidos nos experimentos descritos na Seção~\ref{sec:metodologia}. Todas as estratégias foram avaliadas sob as mesmas condições: mesmo AG base, mesmos operadores e, principalmente, o mesmo critério de parada, definido exclusivamente pelo limite total de avaliações da função de aptidão:
 
-A análise foca em cinco aspectos principais:
+\[
+\text{limite\_avaliacoes} = \lfloor 20 \cdot N \cdot n \rfloor,
+\]
+
+onde $N$ é o tamanho da população e $n$ é o tamanho do tabuleiro.  
+Dessa forma, cada estratégia dispõe do mesmo orçamento computacional, eliminando vieses causados por limites de gerações ou comportamentos internos específicos.
+
+Os resultados exibem valores médios obtidos a partir de múltiplas execuções independentes, o que permite analisar padrões gerais de convergência, qualidade e eficiência. As análises foram organizadas nos seguintes eixos:
 
 \begin{enumerate}
-    \item taxa de sucesso em encontrar uma solução válida;
-    \item número de gerações até a solução;
-    \item tempo total de execução;
-    \item distribuição dos critérios de parada (ótimo encontrado, limite de gerações, limite de tempo);
-    \item impacto do controle por tempo como critério adicional de parada.
+    \item avaliações médias consumidas;
+    \item geração da melhor solução;
+    \item gerações médias;
+    \item melhor aptidão média;
+    \item taxa de sucesso;
+    \item tempo médio de execução.
 \end{enumerate}
 
-Os valores apresentados referem-se às médias, desvios e proporções calculados após o pré-processamento dos arquivos de saída, conforme descrito anteriormente.
+% -------------------------------------------------------------
+\subsection{Avaliações médias por $n$}
 
-% -------------------------------------------
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_avaliacoes_medias.png}
+    \caption{Avaliações médias consumidas por $n$.}
+\end{figure}
+
+As avaliações médias refletem o quanto cada estratégia utilizou do orçamento total antes de encerrar a execução. Os resultados mostram um comportamento consistente:
+
+\begin{itemize}
+    \item Para instâncias pequenas ($n \leq 12$), todas as estratégias consomem quantidades semelhantes de avaliações, o que indica que o problema ainda é simples.
+    \item Entre $n = 12$ e $n = 18$, as estratégias \textbf{controle por idade}, \textbf{substituição parcial} e \textbf{substituição total} tendem a encerrar antes do limite, indicando maior eficiência evolutiva nessas faixas.
+    \item O \textbf{elitismo} apresenta crescimento quase linear, utilizando consistentemente mais avaliações e se aproximando do limite em instâncias maiores. Isso indica convergência mais lenta, embora mais estável.
+\end{itemize}
+
+Esse comportamento sugere que estratégias que preservam diversidade (controle por idade e substituições aleatórias) conseguem explorar mais rapidamente regiões promissoras do espaço de busca, enquanto o elitismo tende a explorar mais profundamente, porém de forma mais lenta.
+
+% -------------------------------------------------------------
 \subsection{Geração da melhor solução}
-\label{sec:melhor_geracao}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_geracao_melhor_media.png}
-    \caption{Geração em que a melhor solução foi encontrada para cada $n$.}
+    \caption{Geração média da melhor solução.}
 \end{figure}
 
-O primeiro gráfico mostra o comportamento do algoritmo em relação ao \textbf{momento em que a melhor solução é alcançada}. Observa-se que:
+A geração em que a melhor solução é encontrada indica \textbf{velocidade inicial de convergência}. Os padrões observados são claros:
 
 \begin{itemize}
-    \item O \textbf{controle por idade} produz soluções boas muito cedo, principalmente até $n=20$, mantendo o número de gerações baixo e estável.
-    \item O \textbf{elitismo} encontra soluções, em média, em gerações progressivamente maiores conforme $n$ aumenta, indicando convergência mais lenta.
-    \item A \textbf{substituição parcial} e a \textbf{substituição total} apresentam comportamento crescente, porém com maior variação e instabilidade.
+    \item O \textbf{controle por idade} encontra boas soluções muito cedo e de forma estável até $n \approx 18$, graças ao mecanismo de lifetime, que retém indivíduos promissores sem impedir a renovação constante.
+    \item O \textbf{elitismo} encontra suas melhores soluções de forma progressivamente mais tardia conforme $n$ aumenta. A forte pressão seletiva acelera a convergência final, mas reduz a exploração inicial.
+    \item As estratégias de \textbf{substituição parcial} e \textbf{total} apresentam maior variabilidade, incluindo oscilações que indicam instabilidade inicial e perda precoce de diversidade.
 \end{itemize}
 
-Esse resultado indica que o controle por idade tende a preservar diversidade suficiente para encontrar soluções prometedoras precocemente, enquanto métodos baseados em elitismo mantêm uma pressão seletiva alta que retarda a exploração inicial.
-
-% -------------------------------------------
-\subsection{Gerações médias por execução}
+% -------------------------------------------------------------
+\subsection{Gerações médias}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_geracoes_medias.png}
-    \caption{Número médio de gerações necessárias por $n$.}
+    \caption{Gerações médias executadas por $n$.}
 \end{figure}
 
-A Figura demonstra como cada estratégia se comporta em termos de \textbf{profundidade de busca}.
-
-Os resultados mostram:
+O número médio de gerações executadas reflete a \textbf{profundidade evolutiva} alcançada antes do término.
 
 \begin{itemize}
-    \item O \textbf{controle por idade} mantém consistentemente as menores médias de gerações até $n \approx 20$, o que sugere forte eficiência evolutiva nesse intervalo.
-    \item O \textbf{elitismo} apresenta crescimento contínuo, atingindo 100 gerações para valores maiores de $n$.
-    \item A \textbf{substituição parcial} e a \textbf{total} crescem rapidamente e atingem o limite máximo de gerações muito cedo (por volta de $n \approx 15$).
+    \item O \textbf{controle por idade} mantém consistentemente o menor número de gerações até $n \approx 20$, indicando ciclos evolutivos mais produtivos.
+    \item O \textbf{elitismo} apresenta um aumento pronunciado, chegando a mais de 70 gerações para $n = 32$. A população tende a se estabilizar parcialmente nas primeiras gerações, exigindo muito mais etapas para refinar soluções.
+    \item As estratégias \textbf{total} e \textbf{parcial} crescem rapidamente em número de gerações, mas sem ganho de qualidade correspondente — evidenciando travamento precoce em ótimos locais.
 \end{itemize}
 
-A dinâmica sugere que estratégias com menor diversidade (como as substituições total e parcial) se tornam rapidamente limitadas, atingindo o critério de parada por gerações sem convergir.
-
-% -------------------------------------------
+% -------------------------------------------------------------
 \subsection{Melhor aptidão média}
 
 \begin{figure}[H]
@@ -65,20 +83,16 @@ A dinâmica sugere que estratégias com menor diversidade (como as substituiçõ
     \caption{Melhor aptidão média encontrada por $n$.}
 \end{figure}
 
-Esse gráfico revela a \textbf{qualidade das melhores soluções} encontradas.
-
-Observa-se que:
+A melhor aptidão média representa a \textbf{qualidade evolutiva global} das soluções encontradas.
 
 \begin{itemize}
-    \item Para $n \leq 12$, todas as estratégias conseguem atingir soluções ótimas com consistência.
-    \item A partir de $n > 15$, a \textbf{aptidão média não chega mais ao valor zero} para as estratégias de \textbf{substituição parcial} e \textbf{total}, mostrando forte limitação nesses esquemas.
-    \item O \textbf{controle por idade} apresenta desempenho significativamente melhor que o elitismo para $15 \leq n \leq 22$, obtendo melhores soluções mesmo quando não encontra a solução ótima.
-    \item O \textbf{elitismo} domina novamente para $n > 25$, produzindo as melhores soluções entre todas as estratégias, mesmo quando a taxa de sucesso cai.
+    \item Para $n \leq 12$, todas as estratégias encontram soluções ótimas com grande consistência.
+    \item A partir de $n > 15$, as estratégias \textbf{total} e \textbf{parcial} deixam de alcançar valores ótimos e degradam progressivamente, resultado da rápida perda de diversidade.
+    \item Entre $15 \leq n \leq 22$, o \textbf{controle por idade} obtém as melhores soluções médias entre todas as estratégias.
+    \item Para $n > 25$, o \textbf{elitismo} passa a liderar, encontrando soluções mais próximas do ótimo — embora à custa de mais tempo e menor taxa de sucesso.
 \end{itemize}
 
-A interpretação é clara: estratégias diferentes favorecem \textit{regiões distintas de complexidade}. O controle por idade é mais eficaz em instâncias intermediárias, ao passo que o elitismo mantém melhor qualidade bruta apesar do maior custo.
-
-% -------------------------------------------
+% -------------------------------------------------------------
 \subsection{Taxa de sucesso}
 
 \begin{figure}[H]
@@ -87,56 +101,46 @@ A interpretação é clara: estratégias diferentes favorecem \textit{regiões d
     \caption{Taxa de sucesso por $n$.}
 \end{figure}
 
-A taxa de sucesso evidencia como cada estratégia lida com o aumento da complexidade do problema.
-
-Os padrões observados são:
+A taxa de sucesso corresponde à proporção de execuções que encontraram uma solução válida antes do limite de avaliações.
 
 \begin{itemize}
-    \item Todas as estratégias têm sucesso total para $n \leq 10$.
-    \item A \textbf{substituição parcial} e a \textbf{total} deixam de resolver o problema por volta de $n \geq 14$, demonstrando limitação estrutural.
-    \item O \textbf{controle por idade} mantém sucesso total até $n=18$ e só começa a cair após esse ponto.
-    \item O \textbf{elitismo} possui a \textbf{melhor taxa de sucesso global}, conseguindo soluções não apenas em $n$ intermediários, mas ainda apresentando sucesso esporádico até $n \approx 40$.
+    \item Todas as estratégias apresentam \textbf{100\% de sucesso até $n = 10$}.
+    \item As estratégias \textbf{total} e \textbf{parcial} colapsam rapidamente a partir de $n \geq 14$.
+    \item O \textbf{controle por idade} mantém sucesso elevado até $n = 18$, diminuindo gradualmente.
+    \item O \textbf{elitismo} apresenta a melhor taxa de sucesso geral, ainda encontrando soluções em instâncias próximas de $n = 32$.
 \end{itemize}
 
-Esse é um dos resultados mais importantes: confirma que o controle por idade é competitivo, mas o elitismo domina quando o foco é exclusivamente obter a solução, independentemente do custo computacional.
-
-% -------------------------------------------
+% -------------------------------------------------------------
 \subsection{Tempo médio de execução}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_tempo_medio.png}
-    \caption{Tempo médio por execução para cada $n$.}
+    \caption{Tempo médio por execução.}
 \end{figure}
 
-O gráfico de tempo evidencia o impacto direto do critério de parada por tempo.
-
-Principais conclusões:
+O tempo médio de execução depende tanto da complexidade do problema quanto da profundidade evolutiva atingida.
 
 \begin{itemize}
-    \item Apenas o \textbf{controle por idade} apresenta crescimento expressivo no tempo conforme $n$ aumenta — chegando a mais de 1,2 segundos para $n \approx 22$.
-    \item As demais estratégias permanecem praticamente planas, indicando que:
-    \begin{enumerate}
-        \item atingem o limite de gerações rapidamente, ou
-        \item convergem antes do limite de tempo.
-    \end{enumerate}
-    \item O comportamento do GAVaPS mostra que ele continua evoluindo enquanto as outras estratégias já estagnaram.
+    \item As estratégias \textbf{parcial}, \textbf{total} e \textbf{controle por idade} apresentam tempos baixos e relativamente estáveis.
+    \item O \textbf{elitismo} é significativamente mais lento em instâncias maiores, ultrapassando 0,03s para os maiores valores de $n$ testados.
+    \item O aumento no tempo é diretamente proporcional ao número de gerações executadas — como observado nos gráficos anteriores.
 \end{itemize}
 
-Isso reforça uma interpretação importante:  
-\textbf{o controle por idade explora mais profundamente o espaço de busca quando necessário}, enquanto as outras estratégias esgotam rapidamente sua capacidade evolutiva.
+% -------------------------------------------------------------
+\subsection{Síntese geral}
 
-% -------------------------------------------
-\subsection{Síntese geral dos cinco gráficos}
-
-Com base nos cinco gráficos:
+Os resultados globais permitem uma caracterização clara das estratégias:
 
 \begin{itemize}
-    \item O \textbf{elitismo} alcança os melhores resultados em instâncias grandes, porém com mais gerações e maior custo de tempo.
-    \item O \textbf{controle por idade} apresenta o melhor equilíbrio geral: soluções rápidas, boas aptidões e maior resiliência ao limite temporal.
-    \item As estratégias de \textbf{substituição total} e \textbf{parcial} são adequadas apenas para problemas pequenos.
+    \item \textbf{Elitismo}:  
+    Melhor taxa de sucesso e melhores soluções em instâncias grandes, mas com maior custo temporal e convergência mais lenta.
+
+    \item \textbf{Controle por idade (GAVaPS)}:  
+    Melhor equilíbrio geral entre tempo, qualidade e sucesso. Excelente para instâncias médias.
+
+    \item \textbf{Substituição parcial e total}:  
+    Adequadas apenas para instâncias pequenas; perdem diversidade rapidamente e falham em instâncias moderadas e grandes.
 \end{itemize}
 
-No contexto prático, isso significa que a escolha da estratégia depende do objetivo:  
-se o foco é \textbf{maior taxa de sucesso}, o elitismo é superior;  
-se o foco é \textbf{melhor equilíbrio entre custo e qualidade}, o controle por idade se destaca.
+De maneira geral, os resultados confirmam que o \textbf{controle populacional} não é um detalhe operacional, mas sim um componente determinante para o comportamento global de um AG, influenciando diretamente a convergência, o custo computacional e a capacidade de escapar de ótimos locais.
