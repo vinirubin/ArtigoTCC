@@ -24,6 +24,7 @@
 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\floatname{algorithm}{Algoritmo}
 
 \usepackage{needspace}
 
@@ -50,18 +51,16 @@ Campus Frederico Westphalen (IFFAR-FW)}
 % Abstract em inglês
 % -------------------------------
 \begin{abstract}
-This article investigates how different population control strategies affect the performance of genetic algorithms applied to the $n$-queens problem. The study presents the design of a baseline implementation, details the experimental protocol, and discusses the interpretation of metrics such as execution time, number of generations, and success rate. The objective is to identify configurations capable of preserving population diversity while accelerating convergence, offering practical guidelines for applying evolutionary heuristics to combinatorial search problems.
-
-\textbf{Keywords:} Genetic Algorithms, Population Control, Evolutionary Computation, N-Queens Problem.
+This work compares four population control strategies in genetic algorithms applied to the $n$-queens problem. Using a unified stopping criterion based solely on the maximum number of fitness evaluations, the study isolates the effect of each substitution mechanism on convergence, solution quality, and success rate. Results show that population control strongly influences evolutionary behavior: age-based control offers the best balance between exploration and efficiency, elitism excels in larger instances, and full or partial replacement degrades as diversity decreases.
+\textbf{Keywords:} Genetic Algorithms; Population Control; Evolutionary Computation; N-Queens.
 \end{abstract}
 
 % -------------------------------
 % Resumo em português
 % -------------------------------
 \begin{resumo}
-Este artigo investiga como diferentes estratégias de controle populacional influenciam o desempenho de algoritmos genéticos aplicados ao problema das $n$-rainhas. São apresentados o planejamento da implementação base, o protocolo experimental e a análise de métricas como tempo de execução, número de gerações e taxa de sucesso. O objetivo é identificar configurações capazes de preservar a diversidade populacional e, ao mesmo tempo, acelerar a convergência, fornecendo orientações práticas para o uso de heurísticas evolutivas em tarefas de busca combinatória.
-
-\textbf{Palavras-chave:} Algoritmos Genéticos, Controle Populacional, Computação Evolutiva, Problema das N-Rainhas.
+Este trabalho compara quatro estratégias de controle populacional em algoritmos genéticos aplicados ao problema das $n$-rainhas. Com um critério de parada unificado baseado apenas no número máximo de avaliações, o estudo isola o impacto das políticas de substituição sobre a convergência, a qualidade das soluções e a taxa de sucesso. Os resultados mostram que o controle populacional influencia fortemente a dinâmica evolutiva: o controle por idade apresenta melhor equilíbrio geral, o elitismo se destaca em instâncias maiores, e as estratégias de substituição total e parcial perdem desempenho com a redução da diversidade.
+\textbf{Palavras-chave:} Algoritmos Genéticos; Controle Populacional; Computação Evolutiva; N-Rainhas.
 \end{resumo}
 
 % -------------------------------

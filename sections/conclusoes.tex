@@ -3,46 +3,46 @@
 
 \subsection{Conclusões Gerais}
 
-Este trabalho investigou o impacto de diferentes estratégias de controle populacional em algoritmos genéticos aplicados ao problema das \textit{n}-rainhas, utilizando um critério de parada unificado baseado exclusivamente no número máximo de avaliações da função de aptidão. A implementação modular desenvolvida permitiu a execução sistemática e reprodutível dos experimentos, possibilitando comparar de maneira justa as quatro abordagens estudadas: substituição geracional, substituição parcial, elitismo e controle por idade (modelo inspirado no GAVaPS de Michalewicz).
+Este trabalho investigou o impacto de diferentes estratégias de controle populacional em algoritmos genéticos aplicados ao problema das \textit{n}-rainhas, adotando um critério de parada unificado baseado exclusivamente no número máximo de avaliações da função de aptidão. A implementação modular desenvolvida permitiu conduzir experimentos sistemáticos, comparáveis e reprodutíveis, possibilitando uma avaliação justa das quatro abordagens estudadas: substituição total, substituição parcial, elitismo e controle por idade (inspirado no GAVaPS de Michalewicz).
 
-Os resultados demonstraram que o mecanismo de controle populacional influencia profundamente o comportamento evolutivo do algoritmo, afetando diretamente a taxa de sucesso, a qualidade das soluções, a estabilidade da busca e a eficiência do processo evolutivo. Entre as estratégias avaliadas, o \textbf{elitismo} destacou-se em instâncias maiores devido à sua maior capacidade de preservar bons indivíduos ao longo das avaliações, mesmo exigindo mais etapas evolutivas para alcançar soluções de qualidade. Por outro lado, o \textbf{controle por idade} apresentou o melhor equilíbrio global, combinando boa capacidade exploratória, manutenção de diversidade e rapidez na convergência em instâncias de complexidade moderada.
+Os resultados confirmam que o mecanismo de substituição populacional exerce influência direta e profunda sobre o comportamento evolutivo do AG, afetando tanto a taxa de sucesso quanto a estabilidade da busca, a diversidade populacional e a eficiência computacional. Entre as estratégias avaliadas, o \textbf{elitismo} apresentou desempenho superior em instâncias maiores, principalmente por sua habilidade de preservar indivíduos de alta aptidão ao longo das avaliações. 
 
-As abordagens de \textbf{substituição geracional} e \textbf{substituição parcial} mostraram-se adequadas apenas para instâncias menores, perdendo eficiência rapidamente à medida que o valor de $n$ aumenta. Essa perda de desempenho está fortemente relacionada à baixa capacidade de preservar diversidade e ao rápido colapso estrutural da população.
+O \textbf{controle por idade}, por sua vez, demonstrou o melhor equilíbrio global, combinando capacidade exploratória, preservação natural de diversidade e rapidez na convergência para valores intermediários de $n$. Já as estratégias de \textbf{substituição total} e \textbf{substituição parcial} apresentaram desempenho satisfatório apenas nas menores instâncias, perdendo competitividade à medida que $n$ aumenta — consequência direta da menor resiliência à perda de diversidade e da maior tendência à estagnação populacional.
 
-De modo geral, os experimentos evidenciam que políticas de substituição não devem ser tratadas como detalhes implementacionais, mas sim como componentes centrais da dinâmica do algoritmo genético. Os resultados reforçam também que o controle por idade — com seu mecanismo de renovação gradual e preservação dinâmica de indivíduos — constitui uma alternativa flexível e competitiva em problemas combinatórios desafiadores.
+De forma geral, os achados reforçam que políticas de substituição não devem ser tratadas como meros detalhes implementacionais, mas sim como componentes estruturais da dinâmica evolutiva. O controle por idade, com seu processo de renovação gradual e gerenciamento adaptativo da longevidade dos indivíduos, destaca-se como uma alternativa promissora e flexível para problemas combinatórios desafiadores.
 
 \subsection{Limitações do Estudo}
 
-Embora os resultados obtidos sejam consistentes, algumas limitações devem ser consideradas:
+Apesar dos resultados consistentes, algumas limitações merecem destaque:
 
 \begin{itemize}
-    \item \textbf{Escopo limitado do domínio}: o estudo foi conduzido exclusivamente no problema das \textit{n}-rainhas. Apesar de ser um benchmark clássico, suas características específicas podem favorecer ou prejudicar determinadas estratégias.
-    
-    \item \textbf{Parâmetros fixados}: taxas de mutação, tamanho populacional, pressão seletiva e demais parâmetros foram mantidos constantes ao longo dos experimentos. Outras configurações podem alterar significativamente o comportamento das estratégias.
-    
-    \item \textbf{Ausência de paralelização}: todo o experimento foi realizado em ambiente sequencial. Estratégias com populações maiores poderiam se beneficiar substancialmente de execuções paralelas.
-    
-    \item \textbf{Análise estatística restrita}: embora médias e tendências tenham sido avaliadas, análises estatísticas formais — como testes de hipótese ou intervalos de confiança — não foram exploradas profundamente.
+\item \textbf{Domínio único de avaliação}: o estudo concentrou-se exclusivamente no problema das \textit{n}-rainhas. Embora seja um benchmark consolidado, suas particularidades podem favorecer ou desfavorecer determinadas estratégias.
+\item \textbf{Parâmetros fixos}: taxas de mutação, tamanho populacional, pressão seletiva e demais parâmetros foram mantidos constantes. Diferentes configurações podem modificar substancialmente o desempenho relativo das estratégias.
+
+\item \textbf{Execução sequencial}: todos os experimentos foram executados de forma não paralela. Estratégias que envolvem populações maiores ou mais dinâmicas poderiam se beneficiar de paralelização.
+
+\item \textbf{Análise estatística limitada}: ainda que médias e tendências tenham sido exploradas, análises estatísticas formais — como testes de hipótese ou estimativas de variabilidade — não foram aprofundadas.
+
 \end{itemize}
 
-Essas limitações não invalidam os resultados, mas abrem espaço para investigações complementares.
+Tais limitações não comprometem as conclusões centrais, mas apontam oportunidades relevantes para estudos complementares.
 
 \subsection{Trabalhos Futuros}
 
-Com base nas conclusões e limitações identificadas, diversos caminhos promissores podem ser explorados em trabalhos futuros:
+Com base nas conclusões e limitações, diversas direções promissoras podem ser exploradas:
 
 \begin{itemize}
-    \item \textbf{Aplicar as estratégias a outros problemas}: como Caixeiro Viajante, Sudoku, timetabling ou otimização contínua, verificando a generalidade dos padrões observados.
-    
-    \item \textbf{Aprofundar variantes do GAVaPS}: explorar mecanismos avançados de ajuste de idade, regras adaptativas de reprodução ou variação dinâmica do tamanho populacional, conforme proposto por Michalewicz.
-    
-    \item \textbf{Realizar análises estatísticas formais}: utilizando ANOVA, testes não paramétricos, bootstrap e intervalos de confiança para validar rigorosamente as diferenças entre estratégias.
-    
-    \item \textbf{Aprimorar desempenho computacional}: integrando paralelização em GPU, Numba, multiprocessing ou frameworks como Ray, permitindo experimentar populações maiores e limites maiores de avaliação.
-    
-    \item \textbf{Explorar estratégias híbridas}: como combinar controle por idade com elitismo, mutação adaptativa ou mecanismos de preservação explícita de diversidade.
-    
-    \item \textbf{Desenvolver um painel visual}: criando uma interface interativa para acompanhar a evolução das populações, curvas de aptidão e métricas avançadas em tempo real.
+\item \textbf{Avaliar a generalidade das estratégias}: aplicar os mesmos métodos a outros problemas combinatórios, como Caixeiro Viajante, Sudoku, timetabling ou funções de otimização contínua.
+\item \textbf{Aprofundar variantes do GAVaPS}: investigar ajustes adaptativos de idade, mecanismos avançados de reprodução e políticas dinâmicas de variação do tamanho populacional.
+
+\item \textbf{Adotar análises estatísticas mais robustas}: incorporar ANOVA, testes não paramétricos, bootstrap ou intervalos de confiança para validar formalmente as diferenças entre estratégias.
+
+\item \textbf{Otimizar desempenho}: integrar paralelização via GPU, Numba, multiprocessing ou frameworks distribuídos, permitindo testar populações maiores e limites superiores de avaliação.
+
+\item \textbf{Explorar estratégias híbridas}: combinar controle por idade com elitismo, mutação adaptativa ou mecanismos explícitos de preservação de diversidade.
+
+\item \textbf{Criar um painel visual interativo}: desenvolver ferramentas que permitam acompanhar, em tempo real, a evolução das populações, curvas de aptidão e métricas auxiliares.
+
 \end{itemize}
 
-Essas possibilidades podem ampliar significativamente a compreensão do comportamento evolutivo dos algoritmos genéticos, além de aumentar a aplicabilidade prática das estratégias estudadas.
+Essas direções podem ampliar a compreensão sobre a dinâmica evolutiva dos algoritmos genéticos e fortalecer a aplicabilidade prática das estratégias investigadas.

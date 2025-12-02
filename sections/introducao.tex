@@ -17,8 +17,8 @@ A contribuição principal deste estudo consiste em fornecer uma análise empír
 
 \begin{enumerate}
 \item compara, sob condições uniformes, o desempenho de quatro estratégias de controle populacional;
-\item avalia como cada mecanismo influencia taxa de sucesso, número de gerações, tempo de execução e limites de parada;
+\item avalia como cada mecanismo influencia taxa de sucesso, consumo de avaliações, qualidade das soluções e comportamento evolutivo;
 \item discute vantagens, limitações e cenários de aplicação de cada abordagem.
 \end{enumerate}
 
-Os experimentos incluem múltiplas execuções independentes por configuração e utilizam critérios híbridos de parada (tempo, geração máxima e solução encontrada), possibilitando medir médias, variâncias e padrões de comportamento evolutivo. Essa estrutura fornece evidências quantitativas que auxiliam na escolha da estratégia de controle populacional mais adequada para problemas combinatórios de natureza semelhante.
+Os experimentos incluem múltiplas execuções independentes por configuração e utilizam um critério de parada unificado, baseado exclusivamente em um limite máximo de avaliações da função de aptidão. Esse formato garante igualdade de orçamento computacional entre as estratégias testadas e possibilita uma comparação justa, permitindo medir médias, variâncias e padrões de convergência sob condições estritamente controladas.
