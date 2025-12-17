@@ -10,23 +10,14 @@ Esta seção apresenta e discute os resultados obtidos nos experimentos descrito
 onde $N$ é o tamanho da população e $n$ é o tamanho do tabuleiro.  
 Esse limite estabelece um orçamento computacional igual para todas as estratégias, garantindo que diferenças de desempenho reflitam apenas o comportamento evolutivo de cada mecanismo de controle populacional.
 
-Os resultados exibem valores médios obtidos a partir de múltiplas execuções independentes, permitindo analisar padrões gerais de convergência, qualidade, estabilidade e eficiência. As análises foram organizadas nos seguintes eixos:
-
-\begin{enumerate}
-    \item avaliações médias consumidas;
-    \item geração da melhor solução;
-    \item gerações médias;
-    \item melhor aptidão média;
-    \item taxa de sucesso;
-    \item tempo médio de execução.
-\end{enumerate}
+Os resultados exibem valores médios obtidos a partir de múltiplas execuções independentes, permitindo analisar padrões gerais de convergência, qualidade, estabilidade e eficiência. Para cada estratégia de controle populacional, a análise considerou como parâmetros de desempenho o número médio de avaliações da função de aptidão consumidas, a geração na qual a melhor solução foi encontrada, o número médio de gerações necessárias até a convergência, o valor médio da melhor aptidão obtida, a taxa de sucesso na identificação de soluções válidas e o tempo médio total de execução.
 
 % -------------------------------------------------------------
 \subsection{Avaliações médias por $n$}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_avaliacoes_medias.png}
+\includegraphics[width=\grafico]{pic/linhas_estrategias_avaliacoes_medias.png}
 \caption{Avaliações médias consumidas por $n$.}
 \end{figure}
 
@@ -47,7 +38,7 @@ Os resultados observados seguem esse comportamento:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_geracao_melhor_media.png}
+    \includegraphics[width=\grafico]{pic/linhas_estrategias_geracao_melhor_media.png}
     \caption{Geração média da melhor solução.}
 \end{figure}
 
@@ -64,7 +55,7 @@ A geração na qual a melhor solução é encontrada reflete a \textbf{velocidad
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_geracoes_medias.png}
+    \includegraphics[width=\grafico]{pic/linhas_estrategias_geracoes_medias.png}
     \caption{Gerações médias executadas por $n$.}
 \end{figure}
 
@@ -81,7 +72,7 @@ Com o critério baseado exclusivamente em avaliações, o número de gerações 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_melhor_aptidao_media.png}
+    \includegraphics[width=\grafico]{pic/linhas_estrategias_melhor_aptidao_media.png}
     \caption{Melhor aptidão média encontrada por $n$.}
 \end{figure}
 
@@ -98,7 +89,7 @@ A melhor aptidão média representa a \textbf{qualidade evolutiva global} das so
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_taxa_sucesso.png}
+    \includegraphics[width=\grafico]{pic/linhas_estrategias_taxa_sucesso.png}
     \caption{Taxa de sucesso por $n$.}
 \end{figure}
 
@@ -116,7 +107,7 @@ A taxa de sucesso corresponde à proporção de execuções que encontraram uma 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\linewidth]{pic/linhas_estrategias_tempo_medio.png}
+    \includegraphics[width=\grafico]{pic/linhas_estrategias_tempo_medio.png}
     \caption{Tempo médio por execução.}
 \end{figure}
 
