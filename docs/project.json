@@ -1,0 +1,35 @@
+{
+  "slug": "algoritmos-geneticos-n-rainhas",
+  "title": "Algoritmos genéticos e o problema das N-rainhas",
+  "academicTitle": "Análise Comparativa de Estratégias de Controle Populacional em Algoritmos Genéticos Aplicados ao Problema das N-Rainhas",
+  "description": "Estudo comparativo de quatro estratégias de controle populacional em algoritmos genéticos, com análise de convergência, taxa de sucesso e custo computacional no problema das N-rainhas.",
+  "category": "Pesquisa acadêmica",
+  "language": "pt-BR",
+  "authors": ["Vinícius Rubin", "Igor Yepes"],
+  "institution": "Instituto Federal Farroupilha — Campus Frederico Westphalen",
+  "topics": [
+    "Inteligência artificial",
+    "Computação evolutiva",
+    "Algoritmos genéticos",
+    "Otimização combinatória",
+    "N-rainhas"
+  ],
+  "documentTechnologies": ["LaTeX", "BibTeX"],
+  "experimentTechnologiesDescribedInArticle": ["Python", "NumPy", "Numba", "Matplotlib"],
+  "links": {
+    "repository": "https://github.com/vinirubin/ArtigoTCC",
+    "article": "https://github.com/vinirubin/ArtigoTCC/blob/main/TCC-Viniciusrubin.pdf"
+  },
+  "assets": {
+    "article": "TCC-Viniciusrubin.pdf",
+    "image": "pic/linhas_estrategias_taxa_sucesso.png",
+    "imageAlt": "Taxa de sucesso das quatro estratégias de controle populacional por tamanho do tabuleiro"
+  },
+  "availability": {
+    "articleSources": true,
+    "articlePdf": true,
+    "resultFigures": true,
+    "experimentSourceCode": false,
+    "rawExperimentData": false
+  }
+}
